@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Employee {
+  id           Int                  @id @default(autoincrement())
+  name         String
+  email        String               @unique
+  password     String
+  photoUrl     String?              @map("photo_url")
+  position     String
+  phoneNumber  String?              @map("phone_number")
+  role         Role                 @default(EMPLOYEE)
+  attendances  Attendance[]
+  profileLogs  ProfileChangeLog[]
+  createdAt    DateTime             @default(now()) @map("created_at")
+  updatedAt    DateTime             @updatedAt @map("updated_at")
+
+  @@map("employees")
+}
+
+model Attendance {
+  id          Int                   @id @default(autoincrement())
+  employee    Employee              @relation(fields: [employeeId], references: [id])
+  employeeId  Int                   @map("employee_id")
+  date        DateTime
+  time        DateTime
+  status      AttendanceStatus
+  createdAt   DateTime              @default(now()) @map("created_at")
+
+  @@map("attendances")
+}
+
+model ProfileChangeLog {
+  id           Int                  @id @default(autoincrement())
+  employee     Employee             @relation(fields: [employeeId], references: [id])
+  employeeId   Int                  @map("employee_id")
+  fieldChanged String               @map("field_changed")
+  oldValue     String?              @map("old_value")
+  newValue     String?              @map("new_value")
+  changedAt    DateTime             @default(now()) @map("changed_at")
+
+  @@map("profile_change_logs")
+}
+
+enum Role {
+  EMPLOYEE
+  ADMIN
+}
+
+enum AttendanceStatus {
+  CHECKIN
+  CHECKOUT
+}
