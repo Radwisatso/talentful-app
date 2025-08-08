@@ -19,6 +19,15 @@
         "tsConfigPath": "apps/attendance/tsconfig.app.json"
       }
     },
+    "attendance-api-gateway": {
+      "type": "application",
+      "root": "apps/attendance-api-gateway",
+      "entryFile": "main",
+      "sourceRoot": "apps/attendance-api-gateway/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/attendance-api-gateway/tsconfig.app.json"
+      }
+    },
     "employee": {
       "type": "application",
       "root": "apps/employee",
