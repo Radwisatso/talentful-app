@@ -18,4 +18,10 @@ export class AttendanceService {
   getAttendance() {
     return this.attendanceRepository;
   }
+
+  getAttendanceById(id: number): Attendance | undefined {
+    return this.attendanceRepository.find(
+      (attendance) => attendance.id === +id,
+    );
+  }
 }

@@ -126,6 +126,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AttendanceController = void 0;
@@ -139,6 +142,9 @@ let AttendanceController = class AttendanceController {
     getAttendances() {
         return this.attendanceService.getAttendances();
     }
+    getAttendanceById({ id }) {
+        return this.attendanceService.getAttendanceById(+id);
+    }
 };
 exports.AttendanceController = AttendanceController;
 __decorate([
@@ -147,6 +153,13 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
 ], AttendanceController.prototype, "getAttendances", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AttendanceController.prototype, "getAttendanceById", null);
 exports.AttendanceController = AttendanceController = __decorate([
     (0, common_1.Controller)('attendances'),
     __metadata("design:paramtypes", [typeof (_a = typeof attendance_service_1.AttendanceService !== "undefined" && attendance_service_1.AttendanceService) === "function" ? _a : Object])
@@ -229,6 +242,9 @@ let AttendanceService = class AttendanceService {
     }
     getAttendances() {
         return this.attendanceClient.send('attendance.getAttendance', {});
+    }
+    getAttendanceById(id) {
+        return this.attendanceClient.send('attendance.getAttendanceById', id);
     }
 };
 exports.AttendanceService = AttendanceService;

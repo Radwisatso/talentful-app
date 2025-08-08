@@ -10,4 +10,8 @@ export class AttendanceService {
   getAttendances() {
     return this.attendanceClient.send('attendance.getAttendance', {});
   }
+
+  getAttendanceById(id: number) {
+    return this.attendanceClient.send('attendance.getAttendanceById', id);
+  }
 }

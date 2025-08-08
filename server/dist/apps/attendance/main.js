@@ -29,8 +29,11 @@ let AttendanceController = class AttendanceController {
     constructor(attendanceService) {
         this.attendanceService = attendanceService;
     }
-    getHello() {
+    getAttendance() {
         return this.attendanceService.getAttendance();
+    }
+    getAttendanceById(id) {
+        return this.attendanceService.getAttendanceById(id);
     }
 };
 exports.AttendanceController = AttendanceController;
@@ -39,7 +42,13 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
-], AttendanceController.prototype, "getHello", null);
+], AttendanceController.prototype, "getAttendance", null);
+__decorate([
+    (0, microservices_1.MessagePattern)('attendance.getAttendanceById'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], AttendanceController.prototype, "getAttendanceById", null);
 exports.AttendanceController = AttendanceController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [typeof (_a = typeof attendance_service_1.AttendanceService !== "undefined" && attendance_service_1.AttendanceService) === "function" ? _a : Object])
@@ -104,6 +113,9 @@ let AttendanceService = class AttendanceService {
     ];
     getAttendance() {
         return this.attendanceRepository;
+    }
+    getAttendanceById(id) {
+        return this.attendanceRepository.find((attendance) => attendance.id === +id);
     }
 };
 exports.AttendanceService = AttendanceService;

@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { AttendanceService } from './attendance.service';
 import { MessagePattern } from '@nestjs/microservices';
 
@@ -7,7 +7,12 @@ export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}
 
   @MessagePattern('attendance.getAttendance')
-  getHello() {
+  getAttendance() {
     return this.attendanceService.getAttendance();
+  }
+
+  @MessagePattern('attendance.getAttendanceById')
+  getAttendanceById(id: number) {
+    return this.attendanceService.getAttendanceById(id);
   }
 }
