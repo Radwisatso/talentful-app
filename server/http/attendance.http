@@ -1,0 +1,107 @@
+### Variables
+@baseUrl = http://localhost:3000
+@employeeId = 1
+@startDate = 2025-01-01
+@endDate = 2025-01-31
+
+### Check In
+POST {{baseUrl}}/attendances/checkin
+Content-Type: application/json
+
+{
+  "employeeId": {{employeeId}},
+  "date": "2025-01-09T08:00:00.000Z",
+  "time": "2025-01-09T08:00:00.000Z"
+}
+
+### Check Out
+POST {{baseUrl}}/attendances/checkout
+Content-Type: application/json
+
+{
+  "employeeId": {{employeeId}},
+  "date": "2025-01-09T17:00:00.000Z",
+  "time": "2025-01-09T17:00:00.000Z"
+}
+
+### Check In - Different Day
+POST {{baseUrl}}/attendances/checkin
+Content-Type: application/json
+
+{
+  "employeeId": {{employeeId}},
+  "date": "2025-01-08T08:30:00.000Z",
+  "time": "2025-01-08T08:30:00.000Z"
+}
+
+### Check Out - Different Day
+POST {{baseUrl}}/attendances/checkout
+Content-Type: application/json
+
+{
+  "employeeId": {{employeeId}},
+  "date": "2025-01-08T17:30:00.000Z",
+  "time": "2025-01-08T17:30:00.000Z"
+}
+
+### Get Attendance Summary (Default: Current Month)
+GET {{baseUrl}}/attendances/summary?employeeId={{employeeId}}
+Content-Type: application/json
+
+### Get Attendance Summary with Date Range
+GET {{baseUrl}}/attendances/summary?employeeId={{employeeId}}&startDate={{startDate}}&endDate={{endDate}}
+Content-Type: application/json
+
+### Get Attendance Summary - Different Employee
+GET {{baseUrl}}/attendances/summary?employeeId=2&startDate=2025-01-01&endDate=2025-01-31
+Content-Type: application/json
+
+### Get All Attendances (For Admin HRD)
+GET {{baseUrl}}/attendances/all
+Content-Type: application/json
+
+### Get Attendances by Specific Employee
+GET {{baseUrl}}/attendances/employee/{{employeeId}}
+Content-Type: application/json
+
+### Test Multiple Check-ins Same Day (Edge Case)
+POST {{baseUrl}}/attendances/checkin
+Content-Type: application/json
+
+{
+  "employeeId": {{employeeId}},
+  "date": "2025-01-07",
+  "time": "2025-01-07T09:00:00.000Z"
+}
+
+### Test Multiple Check-outs Same Day (Edge Case)
+POST {{baseUrl}}/attendances/checkout
+Content-Type: application/json
+
+{
+  "employeeId": {{employeeId}},
+  "date": "2025-01-07",
+  "time": "2025-01-07T18:00:00.000Z"
+}
+
+### Test Error Cases
+
+### Invalid Employee ID
+POST {{baseUrl}}/attendances/checkin
+Content-Type: application/json
+
+{
+  "employeeId": 9999,
+  "date": "2025-01-09",
+  "time": "2025-01-09T08:00:00.000Z"
+}
+
+### Invalid Date Format
+POST {{baseUrl}}/attendances/checkin
+Content-Type: application/json
+
+{
+  "employeeId": {{employeeId}},
+  "date": "invalid-date",
+  "time": "2025-01-09T08:00:00.000Z"
+}

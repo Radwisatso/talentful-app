@@ -132,37 +132,72 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AttendanceController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const attendance_service_1 = __webpack_require__(/*! ./attendance.service */ "./apps/attendance-api-gateway/src/attendance/attendance.service.ts");
+const libs_1 = __webpack_require__(/*! ../../../../libs */ "./libs/index.ts");
 let AttendanceController = class AttendanceController {
     attendanceService;
     constructor(attendanceService) {
         this.attendanceService = attendanceService;
     }
-    getAttendances() {
-        return this.attendanceService.getAttendances();
+    checkin(dto) {
+        return this.attendanceService.checkin(dto);
     }
-    getAttendanceById({ id }) {
-        return this.attendanceService.getAttendanceById(+id);
+    checkout(dto) {
+        return this.attendanceService.checkout(dto);
+    }
+    getSummary(query) {
+        const parsedQuery = {
+            ...query,
+            employeeId: Number(query.employeeId),
+        };
+        return this.attendanceService.getSummary(parsedQuery);
+    }
+    getAllAttendances() {
+        return this.attendanceService.getAllAttendances();
+    }
+    getAttendancesByEmployee(id) {
+        return this.attendanceService.getAttendancesByEmployee(Number(id));
     }
 };
 exports.AttendanceController = AttendanceController;
 __decorate([
-    (0, common_1.Get)(),
+    (0, common_1.Post)('checkin'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof Omit !== "undefined" && Omit) === "function" ? _b : Object]),
+    __metadata("design:returntype", void 0)
+], AttendanceController.prototype, "checkin", null);
+__decorate([
+    (0, common_1.Post)('checkout'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_c = typeof Omit !== "undefined" && Omit) === "function" ? _c : Object]),
+    __metadata("design:returntype", void 0)
+], AttendanceController.prototype, "checkout", null);
+__decorate([
+    (0, common_1.Get)('summary'),
+    __param(0, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof libs_1.AttendanceSummaryQueryDto !== "undefined" && libs_1.AttendanceSummaryQueryDto) === "function" ? _d : Object]),
+    __metadata("design:returntype", void 0)
+], AttendanceController.prototype, "getSummary", null);
+__decorate([
+    (0, common_1.Get)('all'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
-], AttendanceController.prototype, "getAttendances", null);
+], AttendanceController.prototype, "getAllAttendances", null);
 __decorate([
-    (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)()),
+    (0, common_1.Get)('employee/:id'),
+    __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
-], AttendanceController.prototype, "getAttendanceById", null);
+], AttendanceController.prototype, "getAttendancesByEmployee", null);
 exports.AttendanceController = AttendanceController = __decorate([
     (0, common_1.Controller)('attendances'),
     __metadata("design:paramtypes", [typeof (_a = typeof attendance_service_1.AttendanceService !== "undefined" && attendance_service_1.AttendanceService) === "function" ? _a : Object])
@@ -240,16 +275,26 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AttendanceService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const microservices_1 = __webpack_require__(/*! @nestjs/microservices */ "@nestjs/microservices");
+const rxjs_1 = __webpack_require__(/*! rxjs */ "rxjs");
 let AttendanceService = class AttendanceService {
-    attendanceClient;
-    constructor(attendanceClient) {
-        this.attendanceClient = attendanceClient;
+    client;
+    constructor(client) {
+        this.client = client;
     }
-    getAttendances() {
-        return this.attendanceClient.send('attendance.getAttendance', {});
+    checkin(dto) {
+        return (0, rxjs_1.firstValueFrom)(this.client.send('attendance.checkin', dto));
     }
-    getAttendanceById(id) {
-        return this.attendanceClient.send('attendance.getAttendanceById', id);
+    checkout(dto) {
+        return (0, rxjs_1.firstValueFrom)(this.client.send('attendance.checkout', dto));
+    }
+    getSummary(query) {
+        return (0, rxjs_1.firstValueFrom)(this.client.send('attendance.summary', query));
+    }
+    getAllAttendances() {
+        return (0, rxjs_1.firstValueFrom)(this.client.send('attendance.getAll', {}));
+    }
+    getAttendancesByEmployee(employeeId) {
+        return (0, rxjs_1.firstValueFrom)(this.client.send('attendance.getByEmployee', employeeId));
     }
 };
 exports.AttendanceService = AttendanceService;

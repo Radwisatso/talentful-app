@@ -1,17 +1,36 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+import {
+  CreateAttendanceDto,
+  AttendanceSummaryQueryDto,
+} from '../../../../libs';
 
 @Injectable()
 export class AttendanceService {
   constructor(
-    @Inject('ATTENDANCE_CLIENT') private attendanceClient: ClientProxy,
+    @Inject('ATTENDANCE_CLIENT') private readonly client: ClientProxy,
   ) {}
 
-  getAttendances() {
-    return this.attendanceClient.send('attendance.getAttendance', {});
+  checkin(dto: Omit<CreateAttendanceDto, 'status'>) {
+    return firstValueFrom(this.client.send('attendance.checkin', dto));
   }
 
-  getAttendanceById(id: number) {
-    return this.attendanceClient.send('attendance.getAttendanceById', id);
+  checkout(dto: Omit<CreateAttendanceDto, 'status'>) {
+    return firstValueFrom(this.client.send('attendance.checkout', dto));
+  }
+
+  getSummary(query: AttendanceSummaryQueryDto) {
+    return firstValueFrom(this.client.send('attendance.summary', query));
+  }
+
+  getAllAttendances() {
+    return firstValueFrom(this.client.send('attendance.getAll', {}));
+  }
+
+  getAttendancesByEmployee(employeeId: number) {
+    return firstValueFrom(
+      this.client.send('attendance.getByEmployee', employeeId),
+    );
   }
 }
