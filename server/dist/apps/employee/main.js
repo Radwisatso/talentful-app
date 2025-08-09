@@ -133,7 +133,6 @@ const rxjs_1 = __webpack_require__(/*! rxjs */ "rxjs");
 const microservices_1 = __webpack_require__(/*! @nestjs/microservices */ "@nestjs/microservices");
 let EmployeeRpcExceptionFilter = class EmployeeRpcExceptionFilter {
     catch(exception, host) {
-        console.log(exception, host, '<<<<');
         if (exception.getStatus && typeof exception.getStatus === 'function') {
             return (0, rxjs_1.throwError)(() => new microservices_1.RpcException({
                 statusCode: exception.getStatus(),

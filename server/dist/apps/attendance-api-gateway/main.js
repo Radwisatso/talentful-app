@@ -68,12 +68,13 @@ const attendance_api_gateway_controller_1 = __webpack_require__(/*! ./attendance
 const attendance_api_gateway_service_1 = __webpack_require__(/*! ./attendance-api-gateway.service */ "./apps/attendance-api-gateway/src/attendance-api-gateway.service.ts");
 const employee_module_1 = __webpack_require__(/*! ./employee/employee.module */ "./apps/attendance-api-gateway/src/employee/employee.module.ts");
 const attendance_module_1 = __webpack_require__(/*! ./attendance/attendance.module */ "./apps/attendance-api-gateway/src/attendance/attendance.module.ts");
+const auth_module_1 = __webpack_require__(/*! ./auth/auth.module */ "./apps/attendance-api-gateway/src/auth/auth.module.ts");
 let AttendanceApiGatewayModule = class AttendanceApiGatewayModule {
 };
 exports.AttendanceApiGatewayModule = AttendanceApiGatewayModule;
 exports.AttendanceApiGatewayModule = AttendanceApiGatewayModule = __decorate([
     (0, common_1.Module)({
-        imports: [employee_module_1.EmployeeModule, attendance_module_1.AttendanceModule],
+        imports: [employee_module_1.EmployeeModule, attendance_module_1.AttendanceModule, auth_module_1.AuthModule],
         controllers: [attendance_api_gateway_controller_1.AttendanceApiGatewayController],
         providers: [attendance_api_gateway_service_1.AttendanceApiGatewayService],
     })
@@ -307,6 +308,311 @@ exports.AttendanceService = AttendanceService = __decorate([
 
 /***/ }),
 
+/***/ "./apps/attendance-api-gateway/src/auth/auth.controller.ts":
+/*!*****************************************************************!*\
+  !*** ./apps/attendance-api-gateway/src/auth/auth.controller.ts ***!
+  \*****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const auth_service_1 = __webpack_require__(/*! ./auth.service */ "./apps/attendance-api-gateway/src/auth/auth.service.ts");
+let AuthController = class AuthController {
+    authService;
+    constructor(authService) {
+        this.authService = authService;
+    }
+    login(loginDto) {
+        return this.authService.login(loginDto);
+    }
+};
+exports.AuthController = AuthController;
+__decorate([
+    (0, common_1.Post)('login'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "login", null);
+exports.AuthController = AuthController = __decorate([
+    (0, common_1.Controller)('auth'),
+    __metadata("design:paramtypes", [typeof (_a = typeof auth_service_1.AuthService !== "undefined" && auth_service_1.AuthService) === "function" ? _a : Object])
+], AuthController);
+
+
+/***/ }),
+
+/***/ "./apps/attendance-api-gateway/src/auth/auth.module.ts":
+/*!*************************************************************!*\
+  !*** ./apps/attendance-api-gateway/src/auth/auth.module.ts ***!
+  \*************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "./node_modules/@nestjs/jwt/index.js");
+const passport_1 = __webpack_require__(/*! @nestjs/passport */ "./node_modules/@nestjs/passport/index.js");
+const auth_service_1 = __webpack_require__(/*! ./auth.service */ "./apps/attendance-api-gateway/src/auth/auth.service.ts");
+const auth_controller_1 = __webpack_require__(/*! ./auth.controller */ "./apps/attendance-api-gateway/src/auth/auth.controller.ts");
+const jwt_strategy_1 = __webpack_require__(/*! ./jwt.strategy */ "./apps/attendance-api-gateway/src/auth/jwt.strategy.ts");
+const roles_guard_1 = __webpack_require__(/*! ./roles.guard */ "./apps/attendance-api-gateway/src/auth/roles.guard.ts");
+const employee_module_1 = __webpack_require__(/*! ../employee/employee.module */ "./apps/attendance-api-gateway/src/employee/employee.module.ts");
+let AuthModule = class AuthModule {
+};
+exports.AuthModule = AuthModule;
+exports.AuthModule = AuthModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            passport_1.PassportModule,
+            jwt_1.JwtModule.register({
+                secret: process.env.JWT_SECRET || 'your-secret-key',
+                signOptions: { expiresIn: process.env.JWT_EXPIRES_IN || '1h' },
+            }),
+            (0, common_1.forwardRef)(() => employee_module_1.EmployeeModule),
+        ],
+        controllers: [auth_controller_1.AuthController],
+        providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy, roles_guard_1.RolesGuard],
+        exports: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy, roles_guard_1.RolesGuard],
+    })
+], AuthModule);
+
+
+/***/ }),
+
+/***/ "./apps/attendance-api-gateway/src/auth/auth.service.ts":
+/*!**************************************************************!*\
+  !*** ./apps/attendance-api-gateway/src/auth/auth.service.ts ***!
+  \**************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "./node_modules/@nestjs/jwt/index.js");
+const employee_service_1 = __webpack_require__(/*! ../employee/employee.service */ "./apps/attendance-api-gateway/src/employee/employee.service.ts");
+let AuthService = class AuthService {
+    employeeService;
+    jwtService;
+    constructor(employeeService, jwtService) {
+        this.employeeService = employeeService;
+        this.jwtService = jwtService;
+    }
+    async login(loginDto) {
+        const employee = await this.employeeService.validateEmployee(loginDto.email, loginDto.password);
+        if (!employee) {
+            throw new common_1.UnauthorizedException('Invalid email or password');
+        }
+        const payload = {
+            sub: employee.id,
+            email: employee.email,
+            name: employee.name,
+            role: employee.role,
+        };
+        const access_token = this.jwtService.sign(payload);
+        return {
+            access_token,
+            token_type: 'Bearer',
+            expires_in: 3600,
+            user: {
+                id: employee.id,
+                name: employee.name,
+                email: employee.email,
+                role: employee.role,
+                position: employee.position,
+                photoUrl: employee.photoUrl,
+            },
+        };
+    }
+    async validateUser(payload) {
+        return {
+            id: payload.sub,
+            email: payload.email,
+            name: payload.name,
+            role: payload.role,
+        };
+    }
+};
+exports.AuthService = AuthService;
+exports.AuthService = AuthService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object, typeof (_b = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _b : Object])
+], AuthService);
+
+
+/***/ }),
+
+/***/ "./apps/attendance-api-gateway/src/auth/jwt-auth.guard.ts":
+/*!****************************************************************!*\
+  !*** ./apps/attendance-api-gateway/src/auth/jwt-auth.guard.ts ***!
+  \****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.JwtAuthGuard = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const passport_1 = __webpack_require__(/*! @nestjs/passport */ "./node_modules/@nestjs/passport/index.js");
+let JwtAuthGuard = class JwtAuthGuard extends (0, passport_1.AuthGuard)('jwt') {
+};
+exports.JwtAuthGuard = JwtAuthGuard;
+exports.JwtAuthGuard = JwtAuthGuard = __decorate([
+    (0, common_1.Injectable)()
+], JwtAuthGuard);
+
+
+/***/ }),
+
+/***/ "./apps/attendance-api-gateway/src/auth/jwt.strategy.ts":
+/*!**************************************************************!*\
+  !*** ./apps/attendance-api-gateway/src/auth/jwt.strategy.ts ***!
+  \**************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.JwtStrategy = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const passport_1 = __webpack_require__(/*! @nestjs/passport */ "./node_modules/@nestjs/passport/index.js");
+const passport_jwt_1 = __webpack_require__(/*! passport-jwt */ "./node_modules/passport-jwt/lib/index.js");
+const auth_service_1 = __webpack_require__(/*! ./auth.service */ "./apps/attendance-api-gateway/src/auth/auth.service.ts");
+let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
+    authService;
+    constructor(authService) {
+        super({
+            jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
+            ignoreExpiration: false,
+            secretOrKey: process.env.JWT_SECRET || 'your-secret-key',
+        });
+        this.authService = authService;
+    }
+    async validate(payload) {
+        const user = await this.authService.validateUser(payload);
+        if (!user) {
+            throw new common_1.UnauthorizedException();
+        }
+        return user;
+    }
+};
+exports.JwtStrategy = JwtStrategy;
+exports.JwtStrategy = JwtStrategy = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof auth_service_1.AuthService !== "undefined" && auth_service_1.AuthService) === "function" ? _a : Object])
+], JwtStrategy);
+
+
+/***/ }),
+
+/***/ "./apps/attendance-api-gateway/src/auth/roles.guard.ts":
+/*!*************************************************************!*\
+  !*** ./apps/attendance-api-gateway/src/auth/roles.guard.ts ***!
+  \*************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.RolesGuard = exports.Roles = exports.ROLES_KEY = exports.Role = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
+var Role;
+(function (Role) {
+    Role["EMPLOYEE"] = "EMPLOYEE";
+    Role["ADMIN"] = "ADMIN";
+})(Role || (exports.Role = Role = {}));
+exports.ROLES_KEY = 'roles';
+const Roles = (...roles) => (0, common_1.SetMetadata)(exports.ROLES_KEY, roles);
+exports.Roles = Roles;
+let RolesGuard = class RolesGuard {
+    reflector;
+    constructor(reflector) {
+        this.reflector = reflector;
+    }
+    canActivate(context) {
+        const requiredRoles = this.reflector.getAllAndOverride(exports.ROLES_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+        if (!requiredRoles) {
+            return true;
+        }
+        const { user } = context.switchToHttp().getRequest();
+        return requiredRoles.some((role) => user.role === role);
+    }
+};
+exports.RolesGuard = RolesGuard;
+exports.RolesGuard = RolesGuard = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _a : Object])
+], RolesGuard);
+
+
+/***/ }),
+
 /***/ "./apps/attendance-api-gateway/src/employee/employee.controller.ts":
 /*!*************************************************************************!*\
   !*** ./apps/attendance-api-gateway/src/employee/employee.controller.ts ***!
@@ -333,12 +639,18 @@ exports.EmployeeController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const employee_service_1 = __webpack_require__(/*! ./employee.service */ "./apps/attendance-api-gateway/src/employee/employee.service.ts");
 const libs_1 = __webpack_require__(/*! ../../../../libs */ "./libs/index.ts");
+const jwt_auth_guard_1 = __webpack_require__(/*! ../auth/jwt-auth.guard */ "./apps/attendance-api-gateway/src/auth/jwt-auth.guard.ts");
+const roles_guard_1 = __webpack_require__(/*! ../auth/roles.guard */ "./apps/attendance-api-gateway/src/auth/roles.guard.ts");
 let EmployeeController = class EmployeeController {
     employeeService;
     constructor(employeeService) {
         this.employeeService = employeeService;
     }
-    findAll() {
+    validateEmployee(dto) {
+        return this.employeeService.validateEmployee(dto.email, dto.password);
+    }
+    findAll(req) {
+        console.log(req);
         return this.employeeService.findAll();
     }
     create(dto) {
@@ -350,22 +662,42 @@ let EmployeeController = class EmployeeController {
     findByEmail(email) {
         return this.employeeService.findByEmail(email);
     }
-    updateProfile(id, dto) {
-        return this.employeeService.updateProfile(Number(id), dto);
+    updateProfile(id, dto, req) {
+        const targetId = Number(id);
+        if (req.user.role !== 'ADMIN' && req.user.id !== targetId) {
+            throw new common_1.ForbiddenException('You can only update your own profile');
+        }
+        return this.employeeService.updateProfile(targetId, dto);
     }
-    updatePassword(id, dto) {
-        return this.employeeService.updatePassword(Number(id), dto);
+    updatePassword(id, dto, req) {
+        const targetId = Number(id);
+        if (req.user.role !== 'ADMIN' && req.user.id !== targetId) {
+            throw new common_1.ForbiddenException('You can only update your own password');
+        }
+        return this.employeeService.updatePassword(targetId, dto);
     }
 };
 exports.EmployeeController = EmployeeController;
 __decorate([
-    (0, common_1.Get)(),
+    (0, common_1.Post)('validate'),
+    __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], EmployeeController.prototype, "validateEmployee", null);
+__decorate([
+    (0, common_1.Get)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_guard_1.Roles)(roles_guard_1.Role.ADMIN),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], EmployeeController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Post)(),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_guard_1.Roles)(roles_guard_1.Role.ADMIN),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [typeof (_b = typeof libs_1.CreateEmployeeDto !== "undefined" && libs_1.CreateEmployeeDto) === "function" ? _b : Object]),
@@ -373,6 +705,8 @@ __decorate([
 ], EmployeeController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(':id'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_guard_1.Roles)(roles_guard_1.Role.ADMIN),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -380,6 +714,8 @@ __decorate([
 ], EmployeeController.prototype, "findById", null);
 __decorate([
     (0, common_1.Get)('email/:email'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_guard_1.Roles)(roles_guard_1.Role.ADMIN),
     __param(0, (0, common_1.Param)('email')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
@@ -387,18 +723,22 @@ __decorate([
 ], EmployeeController.prototype, "findByEmail", null);
 __decorate([
     (0, common_1.Patch)(':id/profile'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_c = typeof libs_1.UpdateEmployeeDto !== "undefined" && libs_1.UpdateEmployeeDto) === "function" ? _c : Object]),
+    __metadata("design:paramtypes", [String, typeof (_c = typeof libs_1.UpdateEmployeeDto !== "undefined" && libs_1.UpdateEmployeeDto) === "function" ? _c : Object, Object]),
     __metadata("design:returntype", void 0)
 ], EmployeeController.prototype, "updateProfile", null);
 __decorate([
     (0, common_1.Patch)(':id/password'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_d = typeof libs_1.UpdatePasswordDto !== "undefined" && libs_1.UpdatePasswordDto) === "function" ? _d : Object]),
+    __metadata("design:paramtypes", [String, typeof (_d = typeof libs_1.UpdatePasswordDto !== "undefined" && libs_1.UpdatePasswordDto) === "function" ? _d : Object, Object]),
     __metadata("design:returntype", void 0)
 ], EmployeeController.prototype, "updatePassword", null);
 exports.EmployeeController = EmployeeController = __decorate([
@@ -426,9 +766,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EmployeeModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const employee_service_1 = __webpack_require__(/*! ./employee.service */ "./apps/attendance-api-gateway/src/employee/employee.service.ts");
-const employee_controller_1 = __webpack_require__(/*! ./employee.controller */ "./apps/attendance-api-gateway/src/employee/employee.controller.ts");
 const microservices_1 = __webpack_require__(/*! @nestjs/microservices */ "@nestjs/microservices");
+const employee_controller_1 = __webpack_require__(/*! ./employee.controller */ "./apps/attendance-api-gateway/src/employee/employee.controller.ts");
+const employee_service_1 = __webpack_require__(/*! ./employee.service */ "./apps/attendance-api-gateway/src/employee/employee.service.ts");
+const auth_module_1 = __webpack_require__(/*! ../auth/auth.module */ "./apps/attendance-api-gateway/src/auth/auth.module.ts");
 let EmployeeModule = class EmployeeModule {
 };
 exports.EmployeeModule = EmployeeModule;
@@ -444,9 +785,11 @@ exports.EmployeeModule = EmployeeModule = __decorate([
                     },
                 },
             ]),
+            (0, common_1.forwardRef)(() => auth_module_1.AuthModule),
         ],
         providers: [employee_service_1.EmployeeService],
         controllers: [employee_controller_1.EmployeeController],
+        exports: [employee_service_1.EmployeeService],
     })
 ], EmployeeModule);
 
@@ -1192,6 +1535,6223 @@ exports.PrismaService = PrismaService = __decorate([
 
 /***/ }),
 
+/***/ "./node_modules/@nestjs/jwt/dist/index.js":
+/*!************************************************!*\
+  !*** ./node_modules/@nestjs/jwt/dist/index.js ***!
+  \************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.JsonWebTokenError = exports.NotBeforeError = exports.TokenExpiredError = void 0;
+__exportStar(__webpack_require__(/*! ./interfaces */ "./node_modules/@nestjs/jwt/dist/interfaces/index.js"), exports);
+__exportStar(__webpack_require__(/*! ./jwt.errors */ "./node_modules/@nestjs/jwt/dist/jwt.errors.js"), exports);
+__exportStar(__webpack_require__(/*! ./jwt.module */ "./node_modules/@nestjs/jwt/dist/jwt.module.js"), exports);
+__exportStar(__webpack_require__(/*! ./jwt.service */ "./node_modules/@nestjs/jwt/dist/jwt.service.js"), exports);
+var jsonwebtoken_1 = __webpack_require__(/*! jsonwebtoken */ "./node_modules/jsonwebtoken/index.js");
+Object.defineProperty(exports, "TokenExpiredError", ({ enumerable: true, get: function () { return jsonwebtoken_1.TokenExpiredError; } }));
+Object.defineProperty(exports, "NotBeforeError", ({ enumerable: true, get: function () { return jsonwebtoken_1.NotBeforeError; } }));
+Object.defineProperty(exports, "JsonWebTokenError", ({ enumerable: true, get: function () { return jsonwebtoken_1.JsonWebTokenError; } }));
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/jwt/dist/interfaces/index.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/@nestjs/jwt/dist/interfaces/index.js ***!
+  \***********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(/*! ./jwt-module-options.interface */ "./node_modules/@nestjs/jwt/dist/interfaces/jwt-module-options.interface.js"), exports);
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/jwt/dist/interfaces/jwt-module-options.interface.js":
+/*!**********************************************************************************!*\
+  !*** ./node_modules/@nestjs/jwt/dist/interfaces/jwt-module-options.interface.js ***!
+  \**********************************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.JwtSecretRequestType = void 0;
+var JwtSecretRequestType;
+(function (JwtSecretRequestType) {
+    JwtSecretRequestType[JwtSecretRequestType["SIGN"] = 0] = "SIGN";
+    JwtSecretRequestType[JwtSecretRequestType["VERIFY"] = 1] = "VERIFY";
+})(JwtSecretRequestType || (exports.JwtSecretRequestType = JwtSecretRequestType = {}));
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/jwt/dist/jwt.constants.js":
+/*!********************************************************!*\
+  !*** ./node_modules/@nestjs/jwt/dist/jwt.constants.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.JWT_MODULE_OPTIONS = void 0;
+exports.JWT_MODULE_OPTIONS = 'JWT_MODULE_OPTIONS';
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/jwt/dist/jwt.errors.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/@nestjs/jwt/dist/jwt.errors.js ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.WrongSecretProviderError = void 0;
+class WrongSecretProviderError extends Error {
+}
+exports.WrongSecretProviderError = WrongSecretProviderError;
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/jwt/dist/jwt.module.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/@nestjs/jwt/dist/jwt.module.js ***!
+  \*****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var JwtModule_1;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.JwtModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const jwt_constants_1 = __webpack_require__(/*! ./jwt.constants */ "./node_modules/@nestjs/jwt/dist/jwt.constants.js");
+const jwt_providers_1 = __webpack_require__(/*! ./jwt.providers */ "./node_modules/@nestjs/jwt/dist/jwt.providers.js");
+const jwt_service_1 = __webpack_require__(/*! ./jwt.service */ "./node_modules/@nestjs/jwt/dist/jwt.service.js");
+let JwtModule = JwtModule_1 = class JwtModule {
+    static register(options) {
+        return {
+            module: JwtModule_1,
+            global: options.global,
+            providers: (0, jwt_providers_1.createJwtProvider)(options)
+        };
+    }
+    static registerAsync(options) {
+        return {
+            module: JwtModule_1,
+            global: options.global,
+            imports: options.imports || [],
+            providers: [
+                ...this.createAsyncProviders(options),
+                ...(options.extraProviders ?? [])
+            ]
+        };
+    }
+    static createAsyncProviders(options) {
+        if (options.useExisting || options.useFactory) {
+            return [this.createAsyncOptionsProvider(options)];
+        }
+        return [
+            this.createAsyncOptionsProvider(options),
+            {
+                provide: options.useClass,
+                useClass: options.useClass
+            }
+        ];
+    }
+    static createAsyncOptionsProvider(options) {
+        if (options.useFactory) {
+            return {
+                provide: jwt_constants_1.JWT_MODULE_OPTIONS,
+                useFactory: options.useFactory,
+                inject: options.inject || []
+            };
+        }
+        return {
+            provide: jwt_constants_1.JWT_MODULE_OPTIONS,
+            useFactory: async (optionsFactory) => await optionsFactory.createJwtOptions(),
+            inject: [options.useExisting || options.useClass]
+        };
+    }
+};
+exports.JwtModule = JwtModule;
+exports.JwtModule = JwtModule = JwtModule_1 = __decorate([
+    (0, common_1.Module)({
+        providers: [jwt_service_1.JwtService],
+        exports: [jwt_service_1.JwtService]
+    })
+], JwtModule);
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/jwt/dist/jwt.providers.js":
+/*!********************************************************!*\
+  !*** ./node_modules/@nestjs/jwt/dist/jwt.providers.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.createJwtProvider = createJwtProvider;
+const jwt_constants_1 = __webpack_require__(/*! ./jwt.constants */ "./node_modules/@nestjs/jwt/dist/jwt.constants.js");
+function createJwtProvider(options) {
+    return [{ provide: jwt_constants_1.JWT_MODULE_OPTIONS, useValue: options || {} }];
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/jwt/dist/jwt.service.js":
+/*!******************************************************!*\
+  !*** ./node_modules/@nestjs/jwt/dist/jwt.service.js ***!
+  \******************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.JwtService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const jwt = __webpack_require__(/*! jsonwebtoken */ "./node_modules/jsonwebtoken/index.js");
+const interfaces_1 = __webpack_require__(/*! ./interfaces */ "./node_modules/@nestjs/jwt/dist/interfaces/index.js");
+const jwt_constants_1 = __webpack_require__(/*! ./jwt.constants */ "./node_modules/@nestjs/jwt/dist/jwt.constants.js");
+const jwt_errors_1 = __webpack_require__(/*! ./jwt.errors */ "./node_modules/@nestjs/jwt/dist/jwt.errors.js");
+let JwtService = class JwtService {
+    constructor(options = {}) {
+        this.options = options;
+        this.logger = new common_1.Logger('JwtService');
+    }
+    sign(payload, options) {
+        const signOptions = this.mergeJwtOptions({ ...options }, 'signOptions');
+        const secret = this.getSecretKey(payload, options, 'privateKey', interfaces_1.JwtSecretRequestType.SIGN);
+        if (secret instanceof Promise) {
+            secret.catch(() => { });
+            this.logger.warn('For async version of "secretOrKeyProvider", please use "signAsync".');
+            throw new jwt_errors_1.WrongSecretProviderError();
+        }
+        const allowedSignOptKeys = ['secret', 'privateKey'];
+        const signOptKeys = Object.keys(signOptions);
+        if (typeof payload === 'string' &&
+            signOptKeys.some((k) => !allowedSignOptKeys.includes(k))) {
+            throw new Error('Payload as string is not allowed with the following sign options: ' +
+                signOptKeys.join(', '));
+        }
+        return jwt.sign(payload, secret, signOptions);
+    }
+    signAsync(payload, options) {
+        const signOptions = this.mergeJwtOptions({ ...options }, 'signOptions');
+        const secret = this.getSecretKey(payload, options, 'privateKey', interfaces_1.JwtSecretRequestType.SIGN);
+        const allowedSignOptKeys = ['secret', 'privateKey'];
+        const signOptKeys = Object.keys(signOptions);
+        if (typeof payload === 'string' &&
+            signOptKeys.some((k) => !allowedSignOptKeys.includes(k))) {
+            throw new Error('Payload as string is not allowed with the following sign options: ' +
+                signOptKeys.join(', '));
+        }
+        return new Promise((resolve, reject) => Promise.resolve()
+            .then(() => secret)
+            .then((scrt) => {
+            jwt.sign(payload, scrt, signOptions, (err, encoded) => err ? reject(err) : resolve(encoded));
+        }));
+    }
+    verify(token, options) {
+        const verifyOptions = this.mergeJwtOptions({ ...options }, 'verifyOptions');
+        const secret = this.getSecretKey(token, options, 'publicKey', interfaces_1.JwtSecretRequestType.VERIFY);
+        if (secret instanceof Promise) {
+            secret.catch(() => { });
+            this.logger.warn('For async version of "secretOrKeyProvider", please use "verifyAsync".');
+            throw new jwt_errors_1.WrongSecretProviderError();
+        }
+        return jwt.verify(token, secret, verifyOptions);
+    }
+    verifyAsync(token, options) {
+        const verifyOptions = this.mergeJwtOptions({ ...options }, 'verifyOptions');
+        const secret = this.getSecretKey(token, options, 'publicKey', interfaces_1.JwtSecretRequestType.VERIFY);
+        return new Promise((resolve, reject) => Promise.resolve()
+            .then(() => secret)
+            .then((scrt) => {
+            jwt.verify(token, scrt, verifyOptions, (err, decoded) => err ? reject(err) : resolve(decoded));
+        })
+            .catch(reject));
+    }
+    decode(token, options) {
+        return jwt.decode(token, options);
+    }
+    mergeJwtOptions(options, key) {
+        delete options.secret;
+        if (key === 'signOptions') {
+            delete options.privateKey;
+        }
+        else {
+            delete options.publicKey;
+        }
+        return options
+            ? {
+                ...(this.options[key] || {}),
+                ...options
+            }
+            : this.options[key];
+    }
+    overrideSecretFromOptions(secret) {
+        if (this.options.secretOrPrivateKey) {
+            this.logger.warn(`"secretOrPrivateKey" has been deprecated, please use the new explicit "secret" or use "secretOrKeyProvider" or "privateKey"/"publicKey" exclusively.`);
+            secret = this.options.secretOrPrivateKey;
+        }
+        return secret;
+    }
+    getSecretKey(token, options, key, secretRequestType) {
+        const secret = this.options.secretOrKeyProvider
+            ? this.options.secretOrKeyProvider(secretRequestType, token, options)
+            : options?.secret ||
+                this.options.secret ||
+                (key === 'privateKey'
+                    ? options?.privateKey || this.options.privateKey
+                    : options?.publicKey ||
+                        this.options.publicKey) ||
+                this.options[key];
+        return secret instanceof Promise
+            ? secret.then((sec) => this.overrideSecretFromOptions(sec))
+            : this.overrideSecretFromOptions(secret);
+    }
+};
+exports.JwtService = JwtService;
+exports.JwtService = JwtService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, common_1.Optional)()),
+    __param(0, (0, common_1.Inject)(jwt_constants_1.JWT_MODULE_OPTIONS)),
+    __metadata("design:paramtypes", [Object])
+], JwtService);
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/jwt/index.js":
+/*!*******************************************!*\
+  !*** ./node_modules/@nestjs/jwt/index.js ***!
+  \*******************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+exports.__esModule = true;
+__export(__webpack_require__(/*! ./dist */ "./node_modules/@nestjs/jwt/dist/index.js"));
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/passport/dist/abstract.strategy.js":
+/*!*****************************************************************!*\
+  !*** ./node_modules/@nestjs/passport/dist/abstract.strategy.js ***!
+  \*****************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AbstractStrategy = void 0;
+class AbstractStrategy {
+}
+exports.AbstractStrategy = AbstractStrategy;
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/passport/dist/auth.guard.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/@nestjs/passport/dist/auth.guard.js ***!
+  \**********************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthGuard = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const passport = __webpack_require__(/*! passport */ "./node_modules/passport/lib/index.js");
+const auth_module_options_1 = __webpack_require__(/*! ./interfaces/auth-module.options */ "./node_modules/@nestjs/passport/dist/interfaces/auth-module.options.js");
+const options_1 = __webpack_require__(/*! ./options */ "./node_modules/@nestjs/passport/dist/options.js");
+const memoize_util_1 = __webpack_require__(/*! ./utils/memoize.util */ "./node_modules/@nestjs/passport/dist/utils/memoize.util.js");
+exports.AuthGuard = (0, memoize_util_1.memoize)(createAuthGuard);
+const NO_STRATEGY_ERROR = `In order to use "defaultStrategy", please, ensure to import PassportModule in each place where AuthGuard() is being used. Otherwise, passport won't work correctly.`;
+const authLogger = new common_1.Logger('AuthGuard');
+function createAuthGuard(type) {
+    let MixinAuthGuard = class MixinAuthGuard {
+        constructor(options) {
+            this.options = {};
+            this.options = options ?? this.options;
+            if (!type && !this.options.defaultStrategy) {
+                authLogger.error(NO_STRATEGY_ERROR);
+            }
+        }
+        async canActivate(context) {
+            const options = {
+                ...options_1.defaultOptions,
+                ...this.options,
+                ...(await this.getAuthenticateOptions(context))
+            };
+            const [request, response] = [
+                this.getRequest(context),
+                this.getResponse(context)
+            ];
+            const passportFn = createPassportContext(request, response);
+            const user = await passportFn(type || this.options.defaultStrategy, options, (err, user, info, status) => this.handleRequest(err, user, info, context, status));
+            request[options.property || options_1.defaultOptions.property] = user;
+            return true;
+        }
+        getRequest(context) {
+            return context.switchToHttp().getRequest();
+        }
+        getResponse(context) {
+            return context.switchToHttp().getResponse();
+        }
+        async logIn(request) {
+            const user = request[this.options.property || options_1.defaultOptions.property];
+            await new Promise((resolve, reject) => request.logIn(user, this.options, (err) => err ? reject(err) : resolve()));
+        }
+        handleRequest(err, user, info, context, status) {
+            if (err || !user) {
+                throw err || new common_1.UnauthorizedException();
+            }
+            return user;
+        }
+        getAuthenticateOptions(context) {
+            return undefined;
+        }
+    };
+    __decorate([
+        (0, common_1.Optional)(),
+        (0, common_1.Inject)(auth_module_options_1.AuthModuleOptions),
+        __metadata("design:type", auth_module_options_1.AuthModuleOptions)
+    ], MixinAuthGuard.prototype, "options", void 0);
+    MixinAuthGuard = __decorate([
+        __param(0, (0, common_1.Optional)()),
+        __metadata("design:paramtypes", [auth_module_options_1.AuthModuleOptions])
+    ], MixinAuthGuard);
+    const guard = (0, common_1.mixin)(MixinAuthGuard);
+    return guard;
+}
+const createPassportContext = (request, response) => (type, options, callback) => new Promise((resolve, reject) => passport.authenticate(type, options, (err, user, info, status) => {
+    try {
+        request.authInfo = info;
+        return resolve(callback(err, user, info, status));
+    }
+    catch (err) {
+        reject(err);
+    }
+})(request, response, (err) => (err ? reject(err) : resolve())));
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/passport/dist/index.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/@nestjs/passport/dist/index.js ***!
+  \*****************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(/*! ./abstract.strategy */ "./node_modules/@nestjs/passport/dist/abstract.strategy.js"), exports);
+__exportStar(__webpack_require__(/*! ./auth.guard */ "./node_modules/@nestjs/passport/dist/auth.guard.js"), exports);
+__exportStar(__webpack_require__(/*! ./interfaces */ "./node_modules/@nestjs/passport/dist/interfaces/index.js"), exports);
+__exportStar(__webpack_require__(/*! ./passport.module */ "./node_modules/@nestjs/passport/dist/passport.module.js"), exports);
+__exportStar(__webpack_require__(/*! ./passport/passport.serializer */ "./node_modules/@nestjs/passport/dist/passport/passport.serializer.js"), exports);
+__exportStar(__webpack_require__(/*! ./passport/passport.strategy */ "./node_modules/@nestjs/passport/dist/passport/passport.strategy.js"), exports);
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/passport/dist/interfaces/auth-module.options.js":
+/*!******************************************************************************!*\
+  !*** ./node_modules/@nestjs/passport/dist/interfaces/auth-module.options.js ***!
+  \******************************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AuthModuleOptions = void 0;
+class AuthModuleOptions {
+}
+exports.AuthModuleOptions = AuthModuleOptions;
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/passport/dist/interfaces/index.js":
+/*!****************************************************************!*\
+  !*** ./node_modules/@nestjs/passport/dist/interfaces/index.js ***!
+  \****************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(/*! ./auth-module.options */ "./node_modules/@nestjs/passport/dist/interfaces/auth-module.options.js"), exports);
+__exportStar(__webpack_require__(/*! ./type.interface */ "./node_modules/@nestjs/passport/dist/interfaces/type.interface.js"), exports);
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/passport/dist/interfaces/type.interface.js":
+/*!*************************************************************************!*\
+  !*** ./node_modules/@nestjs/passport/dist/interfaces/type.interface.js ***!
+  \*************************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/passport/dist/options.js":
+/*!*******************************************************!*\
+  !*** ./node_modules/@nestjs/passport/dist/options.js ***!
+  \*******************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.defaultOptions = void 0;
+exports.defaultOptions = {
+    session: false,
+    property: 'user'
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/passport/dist/passport.module.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/@nestjs/passport/dist/passport.module.js ***!
+  \***************************************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var PassportModule_1;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PassportModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const auth_module_options_1 = __webpack_require__(/*! ./interfaces/auth-module.options */ "./node_modules/@nestjs/passport/dist/interfaces/auth-module.options.js");
+let PassportModule = PassportModule_1 = class PassportModule {
+    static register(options) {
+        return {
+            module: PassportModule_1,
+            providers: [{ provide: auth_module_options_1.AuthModuleOptions, useValue: options }],
+            exports: [auth_module_options_1.AuthModuleOptions]
+        };
+    }
+    static registerAsync(options) {
+        return {
+            module: PassportModule_1,
+            imports: options.imports || [],
+            providers: this.createAsyncProviders(options),
+            exports: [auth_module_options_1.AuthModuleOptions]
+        };
+    }
+    static createAsyncProviders(options) {
+        if (options.useExisting || options.useFactory) {
+            return [this.createAsyncOptionsProvider(options)];
+        }
+        return [
+            this.createAsyncOptionsProvider(options),
+            {
+                provide: options.useClass,
+                useClass: options.useClass
+            }
+        ];
+    }
+    static createAsyncOptionsProvider(options) {
+        if (options.useFactory) {
+            return {
+                provide: auth_module_options_1.AuthModuleOptions,
+                useFactory: options.useFactory,
+                inject: options.inject || []
+            };
+        }
+        return {
+            provide: auth_module_options_1.AuthModuleOptions,
+            useFactory: async (optionsFactory) => await optionsFactory.createAuthOptions(),
+            inject: [options.useExisting || options.useClass]
+        };
+    }
+};
+exports.PassportModule = PassportModule;
+exports.PassportModule = PassportModule = PassportModule_1 = __decorate([
+    (0, common_1.Module)({})
+], PassportModule);
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/passport/dist/passport/passport.serializer.js":
+/*!****************************************************************************!*\
+  !*** ./node_modules/@nestjs/passport/dist/passport/passport.serializer.js ***!
+  \****************************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PassportSerializer = void 0;
+const passport = __webpack_require__(/*! passport */ "./node_modules/passport/lib/index.js");
+class PassportSerializer {
+    constructor() {
+        const passportInstance = this.getPassportInstance();
+        passportInstance.serializeUser((user, done) => this.serializeUser(user, done));
+        passportInstance.deserializeUser((payload, done) => this.deserializeUser(payload, done));
+    }
+    getPassportInstance() {
+        return passport;
+    }
+}
+exports.PassportSerializer = PassportSerializer;
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/passport/dist/passport/passport.strategy.js":
+/*!**************************************************************************!*\
+  !*** ./node_modules/@nestjs/passport/dist/passport/passport.strategy.js ***!
+  \**************************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PassportStrategy = PassportStrategy;
+const passport = __webpack_require__(/*! passport */ "./node_modules/passport/lib/index.js");
+class PassportStrategyMixin {
+}
+function PassportStrategy(Strategy, name, callbackArity) {
+    class StrategyWithMixin extends Strategy {
+        constructor(...args) {
+            const callback = async (...params) => {
+                const done = params[params.length - 1];
+                try {
+                    const validateResult = await this.validate(...params);
+                    if (Array.isArray(validateResult)) {
+                        done(null, ...validateResult);
+                    }
+                    else {
+                        done(null, validateResult);
+                    }
+                }
+                catch (err) {
+                    done(err, null);
+                }
+            };
+            if (callbackArity !== undefined) {
+                const validate = new.target?.prototype?.validate;
+                const arity = callbackArity === true ? validate.length + 1 : callbackArity;
+                if (validate) {
+                    Object.defineProperty(callback, 'length', {
+                        value: arity
+                    });
+                }
+            }
+            super(...args, callback);
+            const passportInstance = this.getPassportInstance();
+            if (name) {
+                passportInstance.use(name, this);
+            }
+            else {
+                passportInstance.use(this);
+            }
+        }
+        getPassportInstance() {
+            return passport;
+        }
+    }
+    return StrategyWithMixin;
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/passport/dist/utils/memoize.util.js":
+/*!******************************************************************!*\
+  !*** ./node_modules/@nestjs/passport/dist/utils/memoize.util.js ***!
+  \******************************************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.memoize = memoize;
+const defaultKey = 'default';
+function memoize(fn) {
+    const cache = {};
+    return (...args) => {
+        const n = args[0] || defaultKey;
+        if (n in cache) {
+            return cache[n];
+        }
+        else {
+            const result = fn(n === defaultKey ? undefined : n);
+            cache[n] = result;
+            return result;
+        }
+    };
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/@nestjs/passport/index.js":
+/*!************************************************!*\
+  !*** ./node_modules/@nestjs/passport/index.js ***!
+  \************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+exports.__esModule = true;
+__export(__webpack_require__(/*! ./dist */ "./node_modules/@nestjs/passport/dist/index.js"));
+
+
+/***/ }),
+
+/***/ "./node_modules/buffer-equal-constant-time/index.js":
+/*!**********************************************************!*\
+  !*** ./node_modules/buffer-equal-constant-time/index.js ***!
+  \**********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+/*jshint node:true */
+
+var Buffer = (__webpack_require__(/*! buffer */ "buffer").Buffer); // browserify
+var SlowBuffer = (__webpack_require__(/*! buffer */ "buffer").SlowBuffer);
+
+module.exports = bufferEq;
+
+function bufferEq(a, b) {
+
+  // shortcutting on type is necessary for correctness
+  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b)) {
+    return false;
+  }
+
+  // buffer sizes should be well-known information, so despite this
+  // shortcutting, it doesn't leak any information about the *contents* of the
+  // buffers.
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  var c = 0;
+  for (var i = 0; i < a.length; i++) {
+    /*jshint bitwise:false */
+    c |= a[i] ^ b[i]; // XOR
+  }
+  return c === 0;
+}
+
+bufferEq.install = function() {
+  Buffer.prototype.equal = SlowBuffer.prototype.equal = function equal(that) {
+    return bufferEq(this, that);
+  };
+};
+
+var origBufEqual = Buffer.prototype.equal;
+var origSlowBufEqual = SlowBuffer.prototype.equal;
+bufferEq.restore = function() {
+  Buffer.prototype.equal = origBufEqual;
+  SlowBuffer.prototype.equal = origSlowBufEqual;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/ecdsa-sig-formatter/src/ecdsa-sig-formatter.js":
+/*!*********************************************************************!*\
+  !*** ./node_modules/ecdsa-sig-formatter/src/ecdsa-sig-formatter.js ***!
+  \*********************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var Buffer = (__webpack_require__(/*! safe-buffer */ "safe-buffer").Buffer);
+
+var getParamBytesForAlg = __webpack_require__(/*! ./param-bytes-for-alg */ "./node_modules/ecdsa-sig-formatter/src/param-bytes-for-alg.js");
+
+var MAX_OCTET = 0x80,
+	CLASS_UNIVERSAL = 0,
+	PRIMITIVE_BIT = 0x20,
+	TAG_SEQ = 0x10,
+	TAG_INT = 0x02,
+	ENCODED_TAG_SEQ = (TAG_SEQ | PRIMITIVE_BIT) | (CLASS_UNIVERSAL << 6),
+	ENCODED_TAG_INT = TAG_INT | (CLASS_UNIVERSAL << 6);
+
+function base64Url(base64) {
+	return base64
+		.replace(/=/g, '')
+		.replace(/\+/g, '-')
+		.replace(/\//g, '_');
+}
+
+function signatureAsBuffer(signature) {
+	if (Buffer.isBuffer(signature)) {
+		return signature;
+	} else if ('string' === typeof signature) {
+		return Buffer.from(signature, 'base64');
+	}
+
+	throw new TypeError('ECDSA signature must be a Base64 string or a Buffer');
+}
+
+function derToJose(signature, alg) {
+	signature = signatureAsBuffer(signature);
+	var paramBytes = getParamBytesForAlg(alg);
+
+	// the DER encoded param should at most be the param size, plus a padding
+	// zero, since due to being a signed integer
+	var maxEncodedParamLength = paramBytes + 1;
+
+	var inputLength = signature.length;
+
+	var offset = 0;
+	if (signature[offset++] !== ENCODED_TAG_SEQ) {
+		throw new Error('Could not find expected "seq"');
+	}
+
+	var seqLength = signature[offset++];
+	if (seqLength === (MAX_OCTET | 1)) {
+		seqLength = signature[offset++];
+	}
+
+	if (inputLength - offset < seqLength) {
+		throw new Error('"seq" specified length of "' + seqLength + '", only "' + (inputLength - offset) + '" remaining');
+	}
+
+	if (signature[offset++] !== ENCODED_TAG_INT) {
+		throw new Error('Could not find expected "int" for "r"');
+	}
+
+	var rLength = signature[offset++];
+
+	if (inputLength - offset - 2 < rLength) {
+		throw new Error('"r" specified length of "' + rLength + '", only "' + (inputLength - offset - 2) + '" available');
+	}
+
+	if (maxEncodedParamLength < rLength) {
+		throw new Error('"r" specified length of "' + rLength + '", max of "' + maxEncodedParamLength + '" is acceptable');
+	}
+
+	var rOffset = offset;
+	offset += rLength;
+
+	if (signature[offset++] !== ENCODED_TAG_INT) {
+		throw new Error('Could not find expected "int" for "s"');
+	}
+
+	var sLength = signature[offset++];
+
+	if (inputLength - offset !== sLength) {
+		throw new Error('"s" specified length of "' + sLength + '", expected "' + (inputLength - offset) + '"');
+	}
+
+	if (maxEncodedParamLength < sLength) {
+		throw new Error('"s" specified length of "' + sLength + '", max of "' + maxEncodedParamLength + '" is acceptable');
+	}
+
+	var sOffset = offset;
+	offset += sLength;
+
+	if (offset !== inputLength) {
+		throw new Error('Expected to consume entire buffer, but "' + (inputLength - offset) + '" bytes remain');
+	}
+
+	var rPadding = paramBytes - rLength,
+		sPadding = paramBytes - sLength;
+
+	var dst = Buffer.allocUnsafe(rPadding + rLength + sPadding + sLength);
+
+	for (offset = 0; offset < rPadding; ++offset) {
+		dst[offset] = 0;
+	}
+	signature.copy(dst, offset, rOffset + Math.max(-rPadding, 0), rOffset + rLength);
+
+	offset = paramBytes;
+
+	for (var o = offset; offset < o + sPadding; ++offset) {
+		dst[offset] = 0;
+	}
+	signature.copy(dst, offset, sOffset + Math.max(-sPadding, 0), sOffset + sLength);
+
+	dst = dst.toString('base64');
+	dst = base64Url(dst);
+
+	return dst;
+}
+
+function countPadding(buf, start, stop) {
+	var padding = 0;
+	while (start + padding < stop && buf[start + padding] === 0) {
+		++padding;
+	}
+
+	var needsSign = buf[start + padding] >= MAX_OCTET;
+	if (needsSign) {
+		--padding;
+	}
+
+	return padding;
+}
+
+function joseToDer(signature, alg) {
+	signature = signatureAsBuffer(signature);
+	var paramBytes = getParamBytesForAlg(alg);
+
+	var signatureBytes = signature.length;
+	if (signatureBytes !== paramBytes * 2) {
+		throw new TypeError('"' + alg + '" signatures must be "' + paramBytes * 2 + '" bytes, saw "' + signatureBytes + '"');
+	}
+
+	var rPadding = countPadding(signature, 0, paramBytes);
+	var sPadding = countPadding(signature, paramBytes, signature.length);
+	var rLength = paramBytes - rPadding;
+	var sLength = paramBytes - sPadding;
+
+	var rsBytes = 1 + 1 + rLength + 1 + 1 + sLength;
+
+	var shortLength = rsBytes < MAX_OCTET;
+
+	var dst = Buffer.allocUnsafe((shortLength ? 2 : 3) + rsBytes);
+
+	var offset = 0;
+	dst[offset++] = ENCODED_TAG_SEQ;
+	if (shortLength) {
+		// Bit 8 has value "0"
+		// bits 7-1 give the length.
+		dst[offset++] = rsBytes;
+	} else {
+		// Bit 8 of first octet has value "1"
+		// bits 7-1 give the number of additional length octets.
+		dst[offset++] = MAX_OCTET	| 1;
+		// length, base 256
+		dst[offset++] = rsBytes & 0xff;
+	}
+	dst[offset++] = ENCODED_TAG_INT;
+	dst[offset++] = rLength;
+	if (rPadding < 0) {
+		dst[offset++] = 0;
+		offset += signature.copy(dst, offset, 0, paramBytes);
+	} else {
+		offset += signature.copy(dst, offset, rPadding, paramBytes);
+	}
+	dst[offset++] = ENCODED_TAG_INT;
+	dst[offset++] = sLength;
+	if (sPadding < 0) {
+		dst[offset++] = 0;
+		signature.copy(dst, offset, paramBytes);
+	} else {
+		signature.copy(dst, offset, paramBytes + sPadding);
+	}
+
+	return dst;
+}
+
+module.exports = {
+	derToJose: derToJose,
+	joseToDer: joseToDer
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/ecdsa-sig-formatter/src/param-bytes-for-alg.js":
+/*!*********************************************************************!*\
+  !*** ./node_modules/ecdsa-sig-formatter/src/param-bytes-for-alg.js ***!
+  \*********************************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+function getParamSize(keySize) {
+	var result = ((keySize / 8) | 0) + (keySize % 8 === 0 ? 0 : 1);
+	return result;
+}
+
+var paramBytesForAlg = {
+	ES256: getParamSize(256),
+	ES384: getParamSize(384),
+	ES512: getParamSize(521)
+};
+
+function getParamBytesForAlg(alg) {
+	var paramBytes = paramBytesForAlg[alg];
+	if (paramBytes) {
+		return paramBytes;
+	}
+
+	throw new Error('Unknown algorithm "' + alg + '"');
+}
+
+module.exports = getParamBytesForAlg;
+
+
+/***/ }),
+
+/***/ "./node_modules/jsonwebtoken/decode.js":
+/*!*********************************************!*\
+  !*** ./node_modules/jsonwebtoken/decode.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var jws = __webpack_require__(/*! jws */ "./node_modules/jws/index.js");
+
+module.exports = function (jwt, options) {
+  options = options || {};
+  var decoded = jws.decode(jwt, options);
+  if (!decoded) { return null; }
+  var payload = decoded.payload;
+
+  //try parse the payload
+  if(typeof payload === 'string') {
+    try {
+      var obj = JSON.parse(payload);
+      if(obj !== null && typeof obj === 'object') {
+        payload = obj;
+      }
+    } catch (e) { }
+  }
+
+  //return header if `complete` option is enabled.  header includes claims
+  //such as `kid` and `alg` used to select the key within a JWKS needed to
+  //verify the signature
+  if (options.complete === true) {
+    return {
+      header: decoded.header,
+      payload: payload,
+      signature: decoded.signature
+    };
+  }
+  return payload;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/jsonwebtoken/index.js":
+/*!********************************************!*\
+  !*** ./node_modules/jsonwebtoken/index.js ***!
+  \********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+module.exports = {
+  decode: __webpack_require__(/*! ./decode */ "./node_modules/jsonwebtoken/decode.js"),
+  verify: __webpack_require__(/*! ./verify */ "./node_modules/jsonwebtoken/verify.js"),
+  sign: __webpack_require__(/*! ./sign */ "./node_modules/jsonwebtoken/sign.js"),
+  JsonWebTokenError: __webpack_require__(/*! ./lib/JsonWebTokenError */ "./node_modules/jsonwebtoken/lib/JsonWebTokenError.js"),
+  NotBeforeError: __webpack_require__(/*! ./lib/NotBeforeError */ "./node_modules/jsonwebtoken/lib/NotBeforeError.js"),
+  TokenExpiredError: __webpack_require__(/*! ./lib/TokenExpiredError */ "./node_modules/jsonwebtoken/lib/TokenExpiredError.js"),
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/jsonwebtoken/lib/JsonWebTokenError.js":
+/*!************************************************************!*\
+  !*** ./node_modules/jsonwebtoken/lib/JsonWebTokenError.js ***!
+  \************************************************************/
+/***/ ((module) => {
+
+var JsonWebTokenError = function (message, error) {
+  Error.call(this, message);
+  if(Error.captureStackTrace) {
+    Error.captureStackTrace(this, this.constructor);
+  }
+  this.name = 'JsonWebTokenError';
+  this.message = message;
+  if (error) this.inner = error;
+};
+
+JsonWebTokenError.prototype = Object.create(Error.prototype);
+JsonWebTokenError.prototype.constructor = JsonWebTokenError;
+
+module.exports = JsonWebTokenError;
+
+
+/***/ }),
+
+/***/ "./node_modules/jsonwebtoken/lib/NotBeforeError.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/jsonwebtoken/lib/NotBeforeError.js ***!
+  \*********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var JsonWebTokenError = __webpack_require__(/*! ./JsonWebTokenError */ "./node_modules/jsonwebtoken/lib/JsonWebTokenError.js");
+
+var NotBeforeError = function (message, date) {
+  JsonWebTokenError.call(this, message);
+  this.name = 'NotBeforeError';
+  this.date = date;
+};
+
+NotBeforeError.prototype = Object.create(JsonWebTokenError.prototype);
+
+NotBeforeError.prototype.constructor = NotBeforeError;
+
+module.exports = NotBeforeError;
+
+/***/ }),
+
+/***/ "./node_modules/jsonwebtoken/lib/TokenExpiredError.js":
+/*!************************************************************!*\
+  !*** ./node_modules/jsonwebtoken/lib/TokenExpiredError.js ***!
+  \************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var JsonWebTokenError = __webpack_require__(/*! ./JsonWebTokenError */ "./node_modules/jsonwebtoken/lib/JsonWebTokenError.js");
+
+var TokenExpiredError = function (message, expiredAt) {
+  JsonWebTokenError.call(this, message);
+  this.name = 'TokenExpiredError';
+  this.expiredAt = expiredAt;
+};
+
+TokenExpiredError.prototype = Object.create(JsonWebTokenError.prototype);
+
+TokenExpiredError.prototype.constructor = TokenExpiredError;
+
+module.exports = TokenExpiredError;
+
+/***/ }),
+
+/***/ "./node_modules/jsonwebtoken/lib/asymmetricKeyDetailsSupported.js":
+/*!************************************************************************!*\
+  !*** ./node_modules/jsonwebtoken/lib/asymmetricKeyDetailsSupported.js ***!
+  \************************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const semver = __webpack_require__(/*! semver */ "semver");
+
+module.exports = semver.satisfies(process.version, '>=15.7.0');
+
+
+/***/ }),
+
+/***/ "./node_modules/jsonwebtoken/lib/psSupported.js":
+/*!******************************************************!*\
+  !*** ./node_modules/jsonwebtoken/lib/psSupported.js ***!
+  \******************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var semver = __webpack_require__(/*! semver */ "semver");
+
+module.exports = semver.satisfies(process.version, '^6.12.0 || >=8.0.0');
+
+
+/***/ }),
+
+/***/ "./node_modules/jsonwebtoken/lib/rsaPssKeyDetailsSupported.js":
+/*!********************************************************************!*\
+  !*** ./node_modules/jsonwebtoken/lib/rsaPssKeyDetailsSupported.js ***!
+  \********************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const semver = __webpack_require__(/*! semver */ "semver");
+
+module.exports = semver.satisfies(process.version, '>=16.9.0');
+
+
+/***/ }),
+
+/***/ "./node_modules/jsonwebtoken/lib/timespan.js":
+/*!***************************************************!*\
+  !*** ./node_modules/jsonwebtoken/lib/timespan.js ***!
+  \***************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var ms = __webpack_require__(/*! ms */ "ms");
+
+module.exports = function (time, iat) {
+  var timestamp = iat || Math.floor(Date.now() / 1000);
+
+  if (typeof time === 'string') {
+    var milliseconds = ms(time);
+    if (typeof milliseconds === 'undefined') {
+      return;
+    }
+    return Math.floor(timestamp + milliseconds / 1000);
+  } else if (typeof time === 'number') {
+    return timestamp + time;
+  } else {
+    return;
+  }
+
+};
+
+/***/ }),
+
+/***/ "./node_modules/jsonwebtoken/lib/validateAsymmetricKey.js":
+/*!****************************************************************!*\
+  !*** ./node_modules/jsonwebtoken/lib/validateAsymmetricKey.js ***!
+  \****************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const ASYMMETRIC_KEY_DETAILS_SUPPORTED = __webpack_require__(/*! ./asymmetricKeyDetailsSupported */ "./node_modules/jsonwebtoken/lib/asymmetricKeyDetailsSupported.js");
+const RSA_PSS_KEY_DETAILS_SUPPORTED = __webpack_require__(/*! ./rsaPssKeyDetailsSupported */ "./node_modules/jsonwebtoken/lib/rsaPssKeyDetailsSupported.js");
+
+const allowedAlgorithmsForKeys = {
+  'ec': ['ES256', 'ES384', 'ES512'],
+  'rsa': ['RS256', 'PS256', 'RS384', 'PS384', 'RS512', 'PS512'],
+  'rsa-pss': ['PS256', 'PS384', 'PS512']
+};
+
+const allowedCurves = {
+  ES256: 'prime256v1',
+  ES384: 'secp384r1',
+  ES512: 'secp521r1',
+};
+
+module.exports = function(algorithm, key) {
+  if (!algorithm || !key) return;
+
+  const keyType = key.asymmetricKeyType;
+  if (!keyType) return;
+
+  const allowedAlgorithms = allowedAlgorithmsForKeys[keyType];
+
+  if (!allowedAlgorithms) {
+    throw new Error(`Unknown key type "${keyType}".`);
+  }
+
+  if (!allowedAlgorithms.includes(algorithm)) {
+    throw new Error(`"alg" parameter for "${keyType}" key type must be one of: ${allowedAlgorithms.join(', ')}.`)
+  }
+
+  /*
+   * Ignore the next block from test coverage because it gets executed
+   * conditionally depending on the Node version. Not ignoring it would
+   * prevent us from reaching the target % of coverage for versions of
+   * Node under 15.7.0.
+   */
+  /* istanbul ignore next */
+  if (ASYMMETRIC_KEY_DETAILS_SUPPORTED) {
+    switch (keyType) {
+    case 'ec':
+      const keyCurve = key.asymmetricKeyDetails.namedCurve;
+      const allowedCurve = allowedCurves[algorithm];
+
+      if (keyCurve !== allowedCurve) {
+        throw new Error(`"alg" parameter "${algorithm}" requires curve "${allowedCurve}".`);
+      }
+      break;
+
+    case 'rsa-pss':
+      if (RSA_PSS_KEY_DETAILS_SUPPORTED) {
+        const length = parseInt(algorithm.slice(-3), 10);
+        const { hashAlgorithm, mgf1HashAlgorithm, saltLength } = key.asymmetricKeyDetails;
+
+        if (hashAlgorithm !== `sha${length}` || mgf1HashAlgorithm !== hashAlgorithm) {
+          throw new Error(`Invalid key for this operation, its RSA-PSS parameters do not meet the requirements of "alg" ${algorithm}.`);
+        }
+
+        if (saltLength !== undefined && saltLength > length >> 3) {
+          throw new Error(`Invalid key for this operation, its RSA-PSS parameter saltLength does not meet the requirements of "alg" ${algorithm}.`)
+        }
+      }
+      break;
+    }
+  }
+}
+
+
+/***/ }),
+
+/***/ "./node_modules/jsonwebtoken/sign.js":
+/*!*******************************************!*\
+  !*** ./node_modules/jsonwebtoken/sign.js ***!
+  \*******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const timespan = __webpack_require__(/*! ./lib/timespan */ "./node_modules/jsonwebtoken/lib/timespan.js");
+const PS_SUPPORTED = __webpack_require__(/*! ./lib/psSupported */ "./node_modules/jsonwebtoken/lib/psSupported.js");
+const validateAsymmetricKey = __webpack_require__(/*! ./lib/validateAsymmetricKey */ "./node_modules/jsonwebtoken/lib/validateAsymmetricKey.js");
+const jws = __webpack_require__(/*! jws */ "./node_modules/jws/index.js");
+const includes = __webpack_require__(/*! lodash.includes */ "./node_modules/lodash.includes/index.js");
+const isBoolean = __webpack_require__(/*! lodash.isboolean */ "./node_modules/lodash.isboolean/index.js");
+const isInteger = __webpack_require__(/*! lodash.isinteger */ "./node_modules/lodash.isinteger/index.js");
+const isNumber = __webpack_require__(/*! lodash.isnumber */ "./node_modules/lodash.isnumber/index.js");
+const isPlainObject = __webpack_require__(/*! lodash.isplainobject */ "./node_modules/lodash.isplainobject/index.js");
+const isString = __webpack_require__(/*! lodash.isstring */ "./node_modules/lodash.isstring/index.js");
+const once = __webpack_require__(/*! lodash.once */ "./node_modules/lodash.once/index.js");
+const { KeyObject, createSecretKey, createPrivateKey } = __webpack_require__(/*! crypto */ "crypto")
+
+const SUPPORTED_ALGS = ['RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'HS256', 'HS384', 'HS512', 'none'];
+if (PS_SUPPORTED) {
+  SUPPORTED_ALGS.splice(3, 0, 'PS256', 'PS384', 'PS512');
+}
+
+const sign_options_schema = {
+  expiresIn: { isValid: function(value) { return isInteger(value) || (isString(value) && value); }, message: '"expiresIn" should be a number of seconds or string representing a timespan' },
+  notBefore: { isValid: function(value) { return isInteger(value) || (isString(value) && value); }, message: '"notBefore" should be a number of seconds or string representing a timespan' },
+  audience: { isValid: function(value) { return isString(value) || Array.isArray(value); }, message: '"audience" must be a string or array' },
+  algorithm: { isValid: includes.bind(null, SUPPORTED_ALGS), message: '"algorithm" must be a valid string enum value' },
+  header: { isValid: isPlainObject, message: '"header" must be an object' },
+  encoding: { isValid: isString, message: '"encoding" must be a string' },
+  issuer: { isValid: isString, message: '"issuer" must be a string' },
+  subject: { isValid: isString, message: '"subject" must be a string' },
+  jwtid: { isValid: isString, message: '"jwtid" must be a string' },
+  noTimestamp: { isValid: isBoolean, message: '"noTimestamp" must be a boolean' },
+  keyid: { isValid: isString, message: '"keyid" must be a string' },
+  mutatePayload: { isValid: isBoolean, message: '"mutatePayload" must be a boolean' },
+  allowInsecureKeySizes: { isValid: isBoolean, message: '"allowInsecureKeySizes" must be a boolean'},
+  allowInvalidAsymmetricKeyTypes: { isValid: isBoolean, message: '"allowInvalidAsymmetricKeyTypes" must be a boolean'}
+};
+
+const registered_claims_schema = {
+  iat: { isValid: isNumber, message: '"iat" should be a number of seconds' },
+  exp: { isValid: isNumber, message: '"exp" should be a number of seconds' },
+  nbf: { isValid: isNumber, message: '"nbf" should be a number of seconds' }
+};
+
+function validate(schema, allowUnknown, object, parameterName) {
+  if (!isPlainObject(object)) {
+    throw new Error('Expected "' + parameterName + '" to be a plain object.');
+  }
+  Object.keys(object)
+    .forEach(function(key) {
+      const validator = schema[key];
+      if (!validator) {
+        if (!allowUnknown) {
+          throw new Error('"' + key + '" is not allowed in "' + parameterName + '"');
+        }
+        return;
+      }
+      if (!validator.isValid(object[key])) {
+        throw new Error(validator.message);
+      }
+    });
+}
+
+function validateOptions(options) {
+  return validate(sign_options_schema, false, options, 'options');
+}
+
+function validatePayload(payload) {
+  return validate(registered_claims_schema, true, payload, 'payload');
+}
+
+const options_to_payload = {
+  'audience': 'aud',
+  'issuer': 'iss',
+  'subject': 'sub',
+  'jwtid': 'jti'
+};
+
+const options_for_objects = [
+  'expiresIn',
+  'notBefore',
+  'noTimestamp',
+  'audience',
+  'issuer',
+  'subject',
+  'jwtid',
+];
+
+module.exports = function (payload, secretOrPrivateKey, options, callback) {
+  if (typeof options === 'function') {
+    callback = options;
+    options = {};
+  } else {
+    options = options || {};
+  }
+
+  const isObjectPayload = typeof payload === 'object' &&
+                        !Buffer.isBuffer(payload);
+
+  const header = Object.assign({
+    alg: options.algorithm || 'HS256',
+    typ: isObjectPayload ? 'JWT' : undefined,
+    kid: options.keyid
+  }, options.header);
+
+  function failure(err) {
+    if (callback) {
+      return callback(err);
+    }
+    throw err;
+  }
+
+  if (!secretOrPrivateKey && options.algorithm !== 'none') {
+    return failure(new Error('secretOrPrivateKey must have a value'));
+  }
+
+  if (secretOrPrivateKey != null && !(secretOrPrivateKey instanceof KeyObject)) {
+    try {
+      secretOrPrivateKey = createPrivateKey(secretOrPrivateKey)
+    } catch (_) {
+      try {
+        secretOrPrivateKey = createSecretKey(typeof secretOrPrivateKey === 'string' ? Buffer.from(secretOrPrivateKey) : secretOrPrivateKey)
+      } catch (_) {
+        return failure(new Error('secretOrPrivateKey is not valid key material'));
+      }
+    }
+  }
+
+  if (header.alg.startsWith('HS') && secretOrPrivateKey.type !== 'secret') {
+    return failure(new Error((`secretOrPrivateKey must be a symmetric key when using ${header.alg}`)))
+  } else if (/^(?:RS|PS|ES)/.test(header.alg)) {
+    if (secretOrPrivateKey.type !== 'private') {
+      return failure(new Error((`secretOrPrivateKey must be an asymmetric key when using ${header.alg}`)))
+    }
+    if (!options.allowInsecureKeySizes &&
+      !header.alg.startsWith('ES') &&
+      secretOrPrivateKey.asymmetricKeyDetails !== undefined && //KeyObject.asymmetricKeyDetails is supported in Node 15+
+      secretOrPrivateKey.asymmetricKeyDetails.modulusLength < 2048) {
+      return failure(new Error(`secretOrPrivateKey has a minimum key size of 2048 bits for ${header.alg}`));
+    }
+  }
+
+  if (typeof payload === 'undefined') {
+    return failure(new Error('payload is required'));
+  } else if (isObjectPayload) {
+    try {
+      validatePayload(payload);
+    }
+    catch (error) {
+      return failure(error);
+    }
+    if (!options.mutatePayload) {
+      payload = Object.assign({},payload);
+    }
+  } else {
+    const invalid_options = options_for_objects.filter(function (opt) {
+      return typeof options[opt] !== 'undefined';
+    });
+
+    if (invalid_options.length > 0) {
+      return failure(new Error('invalid ' + invalid_options.join(',') + ' option for ' + (typeof payload ) + ' payload'));
+    }
+  }
+
+  if (typeof payload.exp !== 'undefined' && typeof options.expiresIn !== 'undefined') {
+    return failure(new Error('Bad "options.expiresIn" option the payload already has an "exp" property.'));
+  }
+
+  if (typeof payload.nbf !== 'undefined' && typeof options.notBefore !== 'undefined') {
+    return failure(new Error('Bad "options.notBefore" option the payload already has an "nbf" property.'));
+  }
+
+  try {
+    validateOptions(options);
+  }
+  catch (error) {
+    return failure(error);
+  }
+
+  if (!options.allowInvalidAsymmetricKeyTypes) {
+    try {
+      validateAsymmetricKey(header.alg, secretOrPrivateKey);
+    } catch (error) {
+      return failure(error);
+    }
+  }
+
+  const timestamp = payload.iat || Math.floor(Date.now() / 1000);
+
+  if (options.noTimestamp) {
+    delete payload.iat;
+  } else if (isObjectPayload) {
+    payload.iat = timestamp;
+  }
+
+  if (typeof options.notBefore !== 'undefined') {
+    try {
+      payload.nbf = timespan(options.notBefore, timestamp);
+    }
+    catch (err) {
+      return failure(err);
+    }
+    if (typeof payload.nbf === 'undefined') {
+      return failure(new Error('"notBefore" should be a number of seconds or string representing a timespan eg: "1d", "20h", 60'));
+    }
+  }
+
+  if (typeof options.expiresIn !== 'undefined' && typeof payload === 'object') {
+    try {
+      payload.exp = timespan(options.expiresIn, timestamp);
+    }
+    catch (err) {
+      return failure(err);
+    }
+    if (typeof payload.exp === 'undefined') {
+      return failure(new Error('"expiresIn" should be a number of seconds or string representing a timespan eg: "1d", "20h", 60'));
+    }
+  }
+
+  Object.keys(options_to_payload).forEach(function (key) {
+    const claim = options_to_payload[key];
+    if (typeof options[key] !== 'undefined') {
+      if (typeof payload[claim] !== 'undefined') {
+        return failure(new Error('Bad "options.' + key + '" option. The payload already has an "' + claim + '" property.'));
+      }
+      payload[claim] = options[key];
+    }
+  });
+
+  const encoding = options.encoding || 'utf8';
+
+  if (typeof callback === 'function') {
+    callback = callback && once(callback);
+
+    jws.createSign({
+      header: header,
+      privateKey: secretOrPrivateKey,
+      payload: payload,
+      encoding: encoding
+    }).once('error', callback)
+      .once('done', function (signature) {
+        // TODO: Remove in favor of the modulus length check before signing once node 15+ is the minimum supported version
+        if(!options.allowInsecureKeySizes && /^(?:RS|PS)/.test(header.alg) && signature.length < 256) {
+          return callback(new Error(`secretOrPrivateKey has a minimum key size of 2048 bits for ${header.alg}`))
+        }
+        callback(null, signature);
+      });
+  } else {
+    let signature = jws.sign({header: header, payload: payload, secret: secretOrPrivateKey, encoding: encoding});
+    // TODO: Remove in favor of the modulus length check before signing once node 15+ is the minimum supported version
+    if(!options.allowInsecureKeySizes && /^(?:RS|PS)/.test(header.alg) && signature.length < 256) {
+      throw new Error(`secretOrPrivateKey has a minimum key size of 2048 bits for ${header.alg}`)
+    }
+    return signature
+  }
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/jsonwebtoken/verify.js":
+/*!*********************************************!*\
+  !*** ./node_modules/jsonwebtoken/verify.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+const JsonWebTokenError = __webpack_require__(/*! ./lib/JsonWebTokenError */ "./node_modules/jsonwebtoken/lib/JsonWebTokenError.js");
+const NotBeforeError = __webpack_require__(/*! ./lib/NotBeforeError */ "./node_modules/jsonwebtoken/lib/NotBeforeError.js");
+const TokenExpiredError = __webpack_require__(/*! ./lib/TokenExpiredError */ "./node_modules/jsonwebtoken/lib/TokenExpiredError.js");
+const decode = __webpack_require__(/*! ./decode */ "./node_modules/jsonwebtoken/decode.js");
+const timespan = __webpack_require__(/*! ./lib/timespan */ "./node_modules/jsonwebtoken/lib/timespan.js");
+const validateAsymmetricKey = __webpack_require__(/*! ./lib/validateAsymmetricKey */ "./node_modules/jsonwebtoken/lib/validateAsymmetricKey.js");
+const PS_SUPPORTED = __webpack_require__(/*! ./lib/psSupported */ "./node_modules/jsonwebtoken/lib/psSupported.js");
+const jws = __webpack_require__(/*! jws */ "./node_modules/jws/index.js");
+const {KeyObject, createSecretKey, createPublicKey} = __webpack_require__(/*! crypto */ "crypto");
+
+const PUB_KEY_ALGS = ['RS256', 'RS384', 'RS512'];
+const EC_KEY_ALGS = ['ES256', 'ES384', 'ES512'];
+const RSA_KEY_ALGS = ['RS256', 'RS384', 'RS512'];
+const HS_ALGS = ['HS256', 'HS384', 'HS512'];
+
+if (PS_SUPPORTED) {
+  PUB_KEY_ALGS.splice(PUB_KEY_ALGS.length, 0, 'PS256', 'PS384', 'PS512');
+  RSA_KEY_ALGS.splice(RSA_KEY_ALGS.length, 0, 'PS256', 'PS384', 'PS512');
+}
+
+module.exports = function (jwtString, secretOrPublicKey, options, callback) {
+  if ((typeof options === 'function') && !callback) {
+    callback = options;
+    options = {};
+  }
+
+  if (!options) {
+    options = {};
+  }
+
+  //clone this object since we are going to mutate it.
+  options = Object.assign({}, options);
+
+  let done;
+
+  if (callback) {
+    done = callback;
+  } else {
+    done = function(err, data) {
+      if (err) throw err;
+      return data;
+    };
+  }
+
+  if (options.clockTimestamp && typeof options.clockTimestamp !== 'number') {
+    return done(new JsonWebTokenError('clockTimestamp must be a number'));
+  }
+
+  if (options.nonce !== undefined && (typeof options.nonce !== 'string' || options.nonce.trim() === '')) {
+    return done(new JsonWebTokenError('nonce must be a non-empty string'));
+  }
+
+  if (options.allowInvalidAsymmetricKeyTypes !== undefined && typeof options.allowInvalidAsymmetricKeyTypes !== 'boolean') {
+    return done(new JsonWebTokenError('allowInvalidAsymmetricKeyTypes must be a boolean'));
+  }
+
+  const clockTimestamp = options.clockTimestamp || Math.floor(Date.now() / 1000);
+
+  if (!jwtString){
+    return done(new JsonWebTokenError('jwt must be provided'));
+  }
+
+  if (typeof jwtString !== 'string') {
+    return done(new JsonWebTokenError('jwt must be a string'));
+  }
+
+  const parts = jwtString.split('.');
+
+  if (parts.length !== 3){
+    return done(new JsonWebTokenError('jwt malformed'));
+  }
+
+  let decodedToken;
+
+  try {
+    decodedToken = decode(jwtString, { complete: true });
+  } catch(err) {
+    return done(err);
+  }
+
+  if (!decodedToken) {
+    return done(new JsonWebTokenError('invalid token'));
+  }
+
+  const header = decodedToken.header;
+  let getSecret;
+
+  if(typeof secretOrPublicKey === 'function') {
+    if(!callback) {
+      return done(new JsonWebTokenError('verify must be called asynchronous if secret or public key is provided as a callback'));
+    }
+
+    getSecret = secretOrPublicKey;
+  }
+  else {
+    getSecret = function(header, secretCallback) {
+      return secretCallback(null, secretOrPublicKey);
+    };
+  }
+
+  return getSecret(header, function(err, secretOrPublicKey) {
+    if(err) {
+      return done(new JsonWebTokenError('error in secret or public key callback: ' + err.message));
+    }
+
+    const hasSignature = parts[2].trim() !== '';
+
+    if (!hasSignature && secretOrPublicKey){
+      return done(new JsonWebTokenError('jwt signature is required'));
+    }
+
+    if (hasSignature && !secretOrPublicKey) {
+      return done(new JsonWebTokenError('secret or public key must be provided'));
+    }
+
+    if (!hasSignature && !options.algorithms) {
+      return done(new JsonWebTokenError('please specify "none" in "algorithms" to verify unsigned tokens'));
+    }
+
+    if (secretOrPublicKey != null && !(secretOrPublicKey instanceof KeyObject)) {
+      try {
+        secretOrPublicKey = createPublicKey(secretOrPublicKey);
+      } catch (_) {
+        try {
+          secretOrPublicKey = createSecretKey(typeof secretOrPublicKey === 'string' ? Buffer.from(secretOrPublicKey) : secretOrPublicKey);
+        } catch (_) {
+          return done(new JsonWebTokenError('secretOrPublicKey is not valid key material'))
+        }
+      }
+    }
+
+    if (!options.algorithms) {
+      if (secretOrPublicKey.type === 'secret') {
+        options.algorithms = HS_ALGS;
+      } else if (['rsa', 'rsa-pss'].includes(secretOrPublicKey.asymmetricKeyType)) {
+        options.algorithms = RSA_KEY_ALGS
+      } else if (secretOrPublicKey.asymmetricKeyType === 'ec') {
+        options.algorithms = EC_KEY_ALGS
+      } else {
+        options.algorithms = PUB_KEY_ALGS
+      }
+    }
+
+    if (options.algorithms.indexOf(decodedToken.header.alg) === -1) {
+      return done(new JsonWebTokenError('invalid algorithm'));
+    }
+
+    if (header.alg.startsWith('HS') && secretOrPublicKey.type !== 'secret') {
+      return done(new JsonWebTokenError((`secretOrPublicKey must be a symmetric key when using ${header.alg}`)))
+    } else if (/^(?:RS|PS|ES)/.test(header.alg) && secretOrPublicKey.type !== 'public') {
+      return done(new JsonWebTokenError((`secretOrPublicKey must be an asymmetric key when using ${header.alg}`)))
+    }
+
+    if (!options.allowInvalidAsymmetricKeyTypes) {
+      try {
+        validateAsymmetricKey(header.alg, secretOrPublicKey);
+      } catch (e) {
+        return done(e);
+      }
+    }
+
+    let valid;
+
+    try {
+      valid = jws.verify(jwtString, decodedToken.header.alg, secretOrPublicKey);
+    } catch (e) {
+      return done(e);
+    }
+
+    if (!valid) {
+      return done(new JsonWebTokenError('invalid signature'));
+    }
+
+    const payload = decodedToken.payload;
+
+    if (typeof payload.nbf !== 'undefined' && !options.ignoreNotBefore) {
+      if (typeof payload.nbf !== 'number') {
+        return done(new JsonWebTokenError('invalid nbf value'));
+      }
+      if (payload.nbf > clockTimestamp + (options.clockTolerance || 0)) {
+        return done(new NotBeforeError('jwt not active', new Date(payload.nbf * 1000)));
+      }
+    }
+
+    if (typeof payload.exp !== 'undefined' && !options.ignoreExpiration) {
+      if (typeof payload.exp !== 'number') {
+        return done(new JsonWebTokenError('invalid exp value'));
+      }
+      if (clockTimestamp >= payload.exp + (options.clockTolerance || 0)) {
+        return done(new TokenExpiredError('jwt expired', new Date(payload.exp * 1000)));
+      }
+    }
+
+    if (options.audience) {
+      const audiences = Array.isArray(options.audience) ? options.audience : [options.audience];
+      const target = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
+
+      const match = target.some(function (targetAudience) {
+        return audiences.some(function (audience) {
+          return audience instanceof RegExp ? audience.test(targetAudience) : audience === targetAudience;
+        });
+      });
+
+      if (!match) {
+        return done(new JsonWebTokenError('jwt audience invalid. expected: ' + audiences.join(' or ')));
+      }
+    }
+
+    if (options.issuer) {
+      const invalid_issuer =
+              (typeof options.issuer === 'string' && payload.iss !== options.issuer) ||
+              (Array.isArray(options.issuer) && options.issuer.indexOf(payload.iss) === -1);
+
+      if (invalid_issuer) {
+        return done(new JsonWebTokenError('jwt issuer invalid. expected: ' + options.issuer));
+      }
+    }
+
+    if (options.subject) {
+      if (payload.sub !== options.subject) {
+        return done(new JsonWebTokenError('jwt subject invalid. expected: ' + options.subject));
+      }
+    }
+
+    if (options.jwtid) {
+      if (payload.jti !== options.jwtid) {
+        return done(new JsonWebTokenError('jwt jwtid invalid. expected: ' + options.jwtid));
+      }
+    }
+
+    if (options.nonce) {
+      if (payload.nonce !== options.nonce) {
+        return done(new JsonWebTokenError('jwt nonce invalid. expected: ' + options.nonce));
+      }
+    }
+
+    if (options.maxAge) {
+      if (typeof payload.iat !== 'number') {
+        return done(new JsonWebTokenError('iat required when maxAge is specified'));
+      }
+
+      const maxAgeTimestamp = timespan(options.maxAge, payload.iat);
+      if (typeof maxAgeTimestamp === 'undefined') {
+        return done(new JsonWebTokenError('"maxAge" should be a number of seconds or string representing a timespan eg: "1d", "20h", 60'));
+      }
+      if (clockTimestamp >= maxAgeTimestamp + (options.clockTolerance || 0)) {
+        return done(new TokenExpiredError('maxAge exceeded', new Date(maxAgeTimestamp * 1000)));
+      }
+    }
+
+    if (options.complete === true) {
+      const signature = decodedToken.signature;
+
+      return done(null, {
+        header: header,
+        payload: payload,
+        signature: signature
+      });
+    }
+
+    return done(null, payload);
+  });
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/jwa/index.js":
+/*!***********************************!*\
+  !*** ./node_modules/jwa/index.js ***!
+  \***********************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var Buffer = (__webpack_require__(/*! safe-buffer */ "safe-buffer").Buffer);
+var crypto = __webpack_require__(/*! crypto */ "crypto");
+var formatEcdsa = __webpack_require__(/*! ecdsa-sig-formatter */ "./node_modules/ecdsa-sig-formatter/src/ecdsa-sig-formatter.js");
+var util = __webpack_require__(/*! util */ "util");
+
+var MSG_INVALID_ALGORITHM = '"%s" is not a valid algorithm.\n  Supported algorithms are:\n  "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "PS256", "PS384", "PS512", "ES256", "ES384", "ES512" and "none".'
+var MSG_INVALID_SECRET = 'secret must be a string or buffer';
+var MSG_INVALID_VERIFIER_KEY = 'key must be a string or a buffer';
+var MSG_INVALID_SIGNER_KEY = 'key must be a string, a buffer or an object';
+
+var supportsKeyObjects = typeof crypto.createPublicKey === 'function';
+if (supportsKeyObjects) {
+  MSG_INVALID_VERIFIER_KEY += ' or a KeyObject';
+  MSG_INVALID_SECRET += 'or a KeyObject';
+}
+
+function checkIsPublicKey(key) {
+  if (Buffer.isBuffer(key)) {
+    return;
+  }
+
+  if (typeof key === 'string') {
+    return;
+  }
+
+  if (!supportsKeyObjects) {
+    throw typeError(MSG_INVALID_VERIFIER_KEY);
+  }
+
+  if (typeof key !== 'object') {
+    throw typeError(MSG_INVALID_VERIFIER_KEY);
+  }
+
+  if (typeof key.type !== 'string') {
+    throw typeError(MSG_INVALID_VERIFIER_KEY);
+  }
+
+  if (typeof key.asymmetricKeyType !== 'string') {
+    throw typeError(MSG_INVALID_VERIFIER_KEY);
+  }
+
+  if (typeof key.export !== 'function') {
+    throw typeError(MSG_INVALID_VERIFIER_KEY);
+  }
+};
+
+function checkIsPrivateKey(key) {
+  if (Buffer.isBuffer(key)) {
+    return;
+  }
+
+  if (typeof key === 'string') {
+    return;
+  }
+
+  if (typeof key === 'object') {
+    return;
+  }
+
+  throw typeError(MSG_INVALID_SIGNER_KEY);
+};
+
+function checkIsSecretKey(key) {
+  if (Buffer.isBuffer(key)) {
+    return;
+  }
+
+  if (typeof key === 'string') {
+    return key;
+  }
+
+  if (!supportsKeyObjects) {
+    throw typeError(MSG_INVALID_SECRET);
+  }
+
+  if (typeof key !== 'object') {
+    throw typeError(MSG_INVALID_SECRET);
+  }
+
+  if (key.type !== 'secret') {
+    throw typeError(MSG_INVALID_SECRET);
+  }
+
+  if (typeof key.export !== 'function') {
+    throw typeError(MSG_INVALID_SECRET);
+  }
+}
+
+function fromBase64(base64) {
+  return base64
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+}
+
+function toBase64(base64url) {
+  base64url = base64url.toString();
+
+  var padding = 4 - base64url.length % 4;
+  if (padding !== 4) {
+    for (var i = 0; i < padding; ++i) {
+      base64url += '=';
+    }
+  }
+
+  return base64url
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+}
+
+function typeError(template) {
+  var args = [].slice.call(arguments, 1);
+  var errMsg = util.format.bind(util, template).apply(null, args);
+  return new TypeError(errMsg);
+}
+
+function bufferOrString(obj) {
+  return Buffer.isBuffer(obj) || typeof obj === 'string';
+}
+
+function normalizeInput(thing) {
+  if (!bufferOrString(thing))
+    thing = JSON.stringify(thing);
+  return thing;
+}
+
+function createHmacSigner(bits) {
+  return function sign(thing, secret) {
+    checkIsSecretKey(secret);
+    thing = normalizeInput(thing);
+    var hmac = crypto.createHmac('sha' + bits, secret);
+    var sig = (hmac.update(thing), hmac.digest('base64'))
+    return fromBase64(sig);
+  }
+}
+
+var bufferEqual;
+var timingSafeEqual = 'timingSafeEqual' in crypto ? function timingSafeEqual(a, b) {
+  if (a.byteLength !== b.byteLength) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(a, b)
+} : function timingSafeEqual(a, b) {
+  if (!bufferEqual) {
+    bufferEqual = __webpack_require__(/*! buffer-equal-constant-time */ "./node_modules/buffer-equal-constant-time/index.js");
+  }
+
+  return bufferEqual(a, b)
+}
+
+function createHmacVerifier(bits) {
+  return function verify(thing, signature, secret) {
+    var computedSig = createHmacSigner(bits)(thing, secret);
+    return timingSafeEqual(Buffer.from(signature), Buffer.from(computedSig));
+  }
+}
+
+function createKeySigner(bits) {
+ return function sign(thing, privateKey) {
+    checkIsPrivateKey(privateKey);
+    thing = normalizeInput(thing);
+    // Even though we are specifying "RSA" here, this works with ECDSA
+    // keys as well.
+    var signer = crypto.createSign('RSA-SHA' + bits);
+    var sig = (signer.update(thing), signer.sign(privateKey, 'base64'));
+    return fromBase64(sig);
+  }
+}
+
+function createKeyVerifier(bits) {
+  return function verify(thing, signature, publicKey) {
+    checkIsPublicKey(publicKey);
+    thing = normalizeInput(thing);
+    signature = toBase64(signature);
+    var verifier = crypto.createVerify('RSA-SHA' + bits);
+    verifier.update(thing);
+    return verifier.verify(publicKey, signature, 'base64');
+  }
+}
+
+function createPSSKeySigner(bits) {
+  return function sign(thing, privateKey) {
+    checkIsPrivateKey(privateKey);
+    thing = normalizeInput(thing);
+    var signer = crypto.createSign('RSA-SHA' + bits);
+    var sig = (signer.update(thing), signer.sign({
+      key: privateKey,
+      padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
+      saltLength: crypto.constants.RSA_PSS_SALTLEN_DIGEST
+    }, 'base64'));
+    return fromBase64(sig);
+  }
+}
+
+function createPSSKeyVerifier(bits) {
+  return function verify(thing, signature, publicKey) {
+    checkIsPublicKey(publicKey);
+    thing = normalizeInput(thing);
+    signature = toBase64(signature);
+    var verifier = crypto.createVerify('RSA-SHA' + bits);
+    verifier.update(thing);
+    return verifier.verify({
+      key: publicKey,
+      padding: crypto.constants.RSA_PKCS1_PSS_PADDING,
+      saltLength: crypto.constants.RSA_PSS_SALTLEN_DIGEST
+    }, signature, 'base64');
+  }
+}
+
+function createECDSASigner(bits) {
+  var inner = createKeySigner(bits);
+  return function sign() {
+    var signature = inner.apply(null, arguments);
+    signature = formatEcdsa.derToJose(signature, 'ES' + bits);
+    return signature;
+  };
+}
+
+function createECDSAVerifer(bits) {
+  var inner = createKeyVerifier(bits);
+  return function verify(thing, signature, publicKey) {
+    signature = formatEcdsa.joseToDer(signature, 'ES' + bits).toString('base64');
+    var result = inner(thing, signature, publicKey);
+    return result;
+  };
+}
+
+function createNoneSigner() {
+  return function sign() {
+    return '';
+  }
+}
+
+function createNoneVerifier() {
+  return function verify(thing, signature) {
+    return signature === '';
+  }
+}
+
+module.exports = function jwa(algorithm) {
+  var signerFactories = {
+    hs: createHmacSigner,
+    rs: createKeySigner,
+    ps: createPSSKeySigner,
+    es: createECDSASigner,
+    none: createNoneSigner,
+  }
+  var verifierFactories = {
+    hs: createHmacVerifier,
+    rs: createKeyVerifier,
+    ps: createPSSKeyVerifier,
+    es: createECDSAVerifer,
+    none: createNoneVerifier,
+  }
+  var match = algorithm.match(/^(RS|PS|ES|HS)(256|384|512)$|^(none)$/i);
+  if (!match)
+    throw typeError(MSG_INVALID_ALGORITHM, algorithm);
+  var algo = (match[1] || match[3]).toLowerCase();
+  var bits = match[2];
+
+  return {
+    sign: signerFactories[algo](bits),
+    verify: verifierFactories[algo](bits),
+  }
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/jws/index.js":
+/*!***********************************!*\
+  !*** ./node_modules/jws/index.js ***!
+  \***********************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+/*global exports*/
+var SignStream = __webpack_require__(/*! ./lib/sign-stream */ "./node_modules/jws/lib/sign-stream.js");
+var VerifyStream = __webpack_require__(/*! ./lib/verify-stream */ "./node_modules/jws/lib/verify-stream.js");
+
+var ALGORITHMS = [
+  'HS256', 'HS384', 'HS512',
+  'RS256', 'RS384', 'RS512',
+  'PS256', 'PS384', 'PS512',
+  'ES256', 'ES384', 'ES512'
+];
+
+exports.ALGORITHMS = ALGORITHMS;
+exports.sign = SignStream.sign;
+exports.verify = VerifyStream.verify;
+exports.decode = VerifyStream.decode;
+exports.isValid = VerifyStream.isValid;
+exports.createSign = function createSign(opts) {
+  return new SignStream(opts);
+};
+exports.createVerify = function createVerify(opts) {
+  return new VerifyStream(opts);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/jws/lib/data-stream.js":
+/*!*********************************************!*\
+  !*** ./node_modules/jws/lib/data-stream.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+/*global module, process*/
+var Buffer = (__webpack_require__(/*! safe-buffer */ "safe-buffer").Buffer);
+var Stream = __webpack_require__(/*! stream */ "stream");
+var util = __webpack_require__(/*! util */ "util");
+
+function DataStream(data) {
+  this.buffer = null;
+  this.writable = true;
+  this.readable = true;
+
+  // No input
+  if (!data) {
+    this.buffer = Buffer.alloc(0);
+    return this;
+  }
+
+  // Stream
+  if (typeof data.pipe === 'function') {
+    this.buffer = Buffer.alloc(0);
+    data.pipe(this);
+    return this;
+  }
+
+  // Buffer or String
+  // or Object (assumedly a passworded key)
+  if (data.length || typeof data === 'object') {
+    this.buffer = data;
+    this.writable = false;
+    process.nextTick(function () {
+      this.emit('end', data);
+      this.readable = false;
+      this.emit('close');
+    }.bind(this));
+    return this;
+  }
+
+  throw new TypeError('Unexpected data type ('+ typeof data + ')');
+}
+util.inherits(DataStream, Stream);
+
+DataStream.prototype.write = function write(data) {
+  this.buffer = Buffer.concat([this.buffer, Buffer.from(data)]);
+  this.emit('data', data);
+};
+
+DataStream.prototype.end = function end(data) {
+  if (data)
+    this.write(data);
+  this.emit('end', data);
+  this.emit('close');
+  this.writable = false;
+  this.readable = false;
+};
+
+module.exports = DataStream;
+
+
+/***/ }),
+
+/***/ "./node_modules/jws/lib/sign-stream.js":
+/*!*********************************************!*\
+  !*** ./node_modules/jws/lib/sign-stream.js ***!
+  \*********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+/*global module*/
+var Buffer = (__webpack_require__(/*! safe-buffer */ "safe-buffer").Buffer);
+var DataStream = __webpack_require__(/*! ./data-stream */ "./node_modules/jws/lib/data-stream.js");
+var jwa = __webpack_require__(/*! jwa */ "./node_modules/jwa/index.js");
+var Stream = __webpack_require__(/*! stream */ "stream");
+var toString = __webpack_require__(/*! ./tostring */ "./node_modules/jws/lib/tostring.js");
+var util = __webpack_require__(/*! util */ "util");
+
+function base64url(string, encoding) {
+  return Buffer
+    .from(string, encoding)
+    .toString('base64')
+    .replace(/=/g, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+}
+
+function jwsSecuredInput(header, payload, encoding) {
+  encoding = encoding || 'utf8';
+  var encodedHeader = base64url(toString(header), 'binary');
+  var encodedPayload = base64url(toString(payload), encoding);
+  return util.format('%s.%s', encodedHeader, encodedPayload);
+}
+
+function jwsSign(opts) {
+  var header = opts.header;
+  var payload = opts.payload;
+  var secretOrKey = opts.secret || opts.privateKey;
+  var encoding = opts.encoding;
+  var algo = jwa(header.alg);
+  var securedInput = jwsSecuredInput(header, payload, encoding);
+  var signature = algo.sign(securedInput, secretOrKey);
+  return util.format('%s.%s', securedInput, signature);
+}
+
+function SignStream(opts) {
+  var secret = opts.secret||opts.privateKey||opts.key;
+  var secretStream = new DataStream(secret);
+  this.readable = true;
+  this.header = opts.header;
+  this.encoding = opts.encoding;
+  this.secret = this.privateKey = this.key = secretStream;
+  this.payload = new DataStream(opts.payload);
+  this.secret.once('close', function () {
+    if (!this.payload.writable && this.readable)
+      this.sign();
+  }.bind(this));
+
+  this.payload.once('close', function () {
+    if (!this.secret.writable && this.readable)
+      this.sign();
+  }.bind(this));
+}
+util.inherits(SignStream, Stream);
+
+SignStream.prototype.sign = function sign() {
+  try {
+    var signature = jwsSign({
+      header: this.header,
+      payload: this.payload.buffer,
+      secret: this.secret.buffer,
+      encoding: this.encoding
+    });
+    this.emit('done', signature);
+    this.emit('data', signature);
+    this.emit('end');
+    this.readable = false;
+    return signature;
+  } catch (e) {
+    this.readable = false;
+    this.emit('error', e);
+    this.emit('close');
+  }
+};
+
+SignStream.sign = jwsSign;
+
+module.exports = SignStream;
+
+
+/***/ }),
+
+/***/ "./node_modules/jws/lib/tostring.js":
+/*!******************************************!*\
+  !*** ./node_modules/jws/lib/tostring.js ***!
+  \******************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+/*global module*/
+var Buffer = (__webpack_require__(/*! buffer */ "buffer").Buffer);
+
+module.exports = function toString(obj) {
+  if (typeof obj === 'string')
+    return obj;
+  if (typeof obj === 'number' || Buffer.isBuffer(obj))
+    return obj.toString();
+  return JSON.stringify(obj);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/jws/lib/verify-stream.js":
+/*!***********************************************!*\
+  !*** ./node_modules/jws/lib/verify-stream.js ***!
+  \***********************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+/*global module*/
+var Buffer = (__webpack_require__(/*! safe-buffer */ "safe-buffer").Buffer);
+var DataStream = __webpack_require__(/*! ./data-stream */ "./node_modules/jws/lib/data-stream.js");
+var jwa = __webpack_require__(/*! jwa */ "./node_modules/jwa/index.js");
+var Stream = __webpack_require__(/*! stream */ "stream");
+var toString = __webpack_require__(/*! ./tostring */ "./node_modules/jws/lib/tostring.js");
+var util = __webpack_require__(/*! util */ "util");
+var JWS_REGEX = /^[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)?$/;
+
+function isObject(thing) {
+  return Object.prototype.toString.call(thing) === '[object Object]';
+}
+
+function safeJsonParse(thing) {
+  if (isObject(thing))
+    return thing;
+  try { return JSON.parse(thing); }
+  catch (e) { return undefined; }
+}
+
+function headerFromJWS(jwsSig) {
+  var encodedHeader = jwsSig.split('.', 1)[0];
+  return safeJsonParse(Buffer.from(encodedHeader, 'base64').toString('binary'));
+}
+
+function securedInputFromJWS(jwsSig) {
+  return jwsSig.split('.', 2).join('.');
+}
+
+function signatureFromJWS(jwsSig) {
+  return jwsSig.split('.')[2];
+}
+
+function payloadFromJWS(jwsSig, encoding) {
+  encoding = encoding || 'utf8';
+  var payload = jwsSig.split('.')[1];
+  return Buffer.from(payload, 'base64').toString(encoding);
+}
+
+function isValidJws(string) {
+  return JWS_REGEX.test(string) && !!headerFromJWS(string);
+}
+
+function jwsVerify(jwsSig, algorithm, secretOrKey) {
+  if (!algorithm) {
+    var err = new Error("Missing algorithm parameter for jws.verify");
+    err.code = "MISSING_ALGORITHM";
+    throw err;
+  }
+  jwsSig = toString(jwsSig);
+  var signature = signatureFromJWS(jwsSig);
+  var securedInput = securedInputFromJWS(jwsSig);
+  var algo = jwa(algorithm);
+  return algo.verify(securedInput, signature, secretOrKey);
+}
+
+function jwsDecode(jwsSig, opts) {
+  opts = opts || {};
+  jwsSig = toString(jwsSig);
+
+  if (!isValidJws(jwsSig))
+    return null;
+
+  var header = headerFromJWS(jwsSig);
+
+  if (!header)
+    return null;
+
+  var payload = payloadFromJWS(jwsSig);
+  if (header.typ === 'JWT' || opts.json)
+    payload = JSON.parse(payload, opts.encoding);
+
+  return {
+    header: header,
+    payload: payload,
+    signature: signatureFromJWS(jwsSig)
+  };
+}
+
+function VerifyStream(opts) {
+  opts = opts || {};
+  var secretOrKey = opts.secret||opts.publicKey||opts.key;
+  var secretStream = new DataStream(secretOrKey);
+  this.readable = true;
+  this.algorithm = opts.algorithm;
+  this.encoding = opts.encoding;
+  this.secret = this.publicKey = this.key = secretStream;
+  this.signature = new DataStream(opts.signature);
+  this.secret.once('close', function () {
+    if (!this.signature.writable && this.readable)
+      this.verify();
+  }.bind(this));
+
+  this.signature.once('close', function () {
+    if (!this.secret.writable && this.readable)
+      this.verify();
+  }.bind(this));
+}
+util.inherits(VerifyStream, Stream);
+VerifyStream.prototype.verify = function verify() {
+  try {
+    var valid = jwsVerify(this.signature.buffer, this.algorithm, this.key.buffer);
+    var obj = jwsDecode(this.signature.buffer, this.encoding);
+    this.emit('done', valid, obj);
+    this.emit('data', valid);
+    this.emit('end');
+    this.readable = false;
+    return valid;
+  } catch (e) {
+    this.readable = false;
+    this.emit('error', e);
+    this.emit('close');
+  }
+};
+
+VerifyStream.decode = jwsDecode;
+VerifyStream.isValid = isValidJws;
+VerifyStream.verify = jwsVerify;
+
+module.exports = VerifyStream;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash.includes/index.js":
+/*!***********************************************!*\
+  !*** ./node_modules/lodash.includes/index.js ***!
+  \***********************************************/
+/***/ ((module) => {
+
+/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0,
+    MAX_SAFE_INTEGER = 9007199254740991,
+    MAX_INTEGER = 1.7976931348623157e+308,
+    NAN = 0 / 0;
+
+/** `Object#toString` result references. */
+var argsTag = '[object Arguments]',
+    funcTag = '[object Function]',
+    genTag = '[object GeneratorFunction]',
+    stringTag = '[object String]',
+    symbolTag = '[object Symbol]';
+
+/** Used to match leading and trailing whitespace. */
+var reTrim = /^\s+|\s+$/g;
+
+/** Used to detect bad signed hexadecimal string values. */
+var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
+
+/** Used to detect binary string values. */
+var reIsBinary = /^0b[01]+$/i;
+
+/** Used to detect octal string values. */
+var reIsOctal = /^0o[0-7]+$/i;
+
+/** Used to detect unsigned integer values. */
+var reIsUint = /^(?:0|[1-9]\d*)$/;
+
+/** Built-in method references without a dependency on `root`. */
+var freeParseInt = parseInt;
+
+/**
+ * A specialized version of `_.map` for arrays without support for iteratee
+ * shorthands.
+ *
+ * @private
+ * @param {Array} [array] The array to iterate over.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns the new mapped array.
+ */
+function arrayMap(array, iteratee) {
+  var index = -1,
+      length = array ? array.length : 0,
+      result = Array(length);
+
+  while (++index < length) {
+    result[index] = iteratee(array[index], index, array);
+  }
+  return result;
+}
+
+/**
+ * The base implementation of `_.findIndex` and `_.findLastIndex` without
+ * support for iteratee shorthands.
+ *
+ * @private
+ * @param {Array} array The array to inspect.
+ * @param {Function} predicate The function invoked per iteration.
+ * @param {number} fromIndex The index to search from.
+ * @param {boolean} [fromRight] Specify iterating from right to left.
+ * @returns {number} Returns the index of the matched value, else `-1`.
+ */
+function baseFindIndex(array, predicate, fromIndex, fromRight) {
+  var length = array.length,
+      index = fromIndex + (fromRight ? 1 : -1);
+
+  while ((fromRight ? index-- : ++index < length)) {
+    if (predicate(array[index], index, array)) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+/**
+ * The base implementation of `_.indexOf` without `fromIndex` bounds checks.
+ *
+ * @private
+ * @param {Array} array The array to inspect.
+ * @param {*} value The value to search for.
+ * @param {number} fromIndex The index to search from.
+ * @returns {number} Returns the index of the matched value, else `-1`.
+ */
+function baseIndexOf(array, value, fromIndex) {
+  if (value !== value) {
+    return baseFindIndex(array, baseIsNaN, fromIndex);
+  }
+  var index = fromIndex - 1,
+      length = array.length;
+
+  while (++index < length) {
+    if (array[index] === value) {
+      return index;
+    }
+  }
+  return -1;
+}
+
+/**
+ * The base implementation of `_.isNaN` without support for number objects.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is `NaN`, else `false`.
+ */
+function baseIsNaN(value) {
+  return value !== value;
+}
+
+/**
+ * The base implementation of `_.times` without support for iteratee shorthands
+ * or max array length checks.
+ *
+ * @private
+ * @param {number} n The number of times to invoke `iteratee`.
+ * @param {Function} iteratee The function invoked per iteration.
+ * @returns {Array} Returns the array of results.
+ */
+function baseTimes(n, iteratee) {
+  var index = -1,
+      result = Array(n);
+
+  while (++index < n) {
+    result[index] = iteratee(index);
+  }
+  return result;
+}
+
+/**
+ * The base implementation of `_.values` and `_.valuesIn` which creates an
+ * array of `object` property values corresponding to the property names
+ * of `props`.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @param {Array} props The property names to get values for.
+ * @returns {Object} Returns the array of property values.
+ */
+function baseValues(object, props) {
+  return arrayMap(props, function(key) {
+    return object[key];
+  });
+}
+
+/**
+ * Creates a unary function that invokes `func` with its argument transformed.
+ *
+ * @private
+ * @param {Function} func The function to wrap.
+ * @param {Function} transform The argument transform.
+ * @returns {Function} Returns the new function.
+ */
+function overArg(func, transform) {
+  return function(arg) {
+    return func(transform(arg));
+  };
+}
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString = objectProto.toString;
+
+/** Built-in value references. */
+var propertyIsEnumerable = objectProto.propertyIsEnumerable;
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeKeys = overArg(Object.keys, Object),
+    nativeMax = Math.max;
+
+/**
+ * Creates an array of the enumerable property names of the array-like `value`.
+ *
+ * @private
+ * @param {*} value The value to query.
+ * @param {boolean} inherited Specify returning inherited property names.
+ * @returns {Array} Returns the array of property names.
+ */
+function arrayLikeKeys(value, inherited) {
+  // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
+  // Safari 9 makes `arguments.length` enumerable in strict mode.
+  var result = (isArray(value) || isArguments(value))
+    ? baseTimes(value.length, String)
+    : [];
+
+  var length = result.length,
+      skipIndexes = !!length;
+
+  for (var key in value) {
+    if ((inherited || hasOwnProperty.call(value, key)) &&
+        !(skipIndexes && (key == 'length' || isIndex(key, length)))) {
+      result.push(key);
+    }
+  }
+  return result;
+}
+
+/**
+ * The base implementation of `_.keys` which doesn't treat sparse arrays as dense.
+ *
+ * @private
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ */
+function baseKeys(object) {
+  if (!isPrototype(object)) {
+    return nativeKeys(object);
+  }
+  var result = [];
+  for (var key in Object(object)) {
+    if (hasOwnProperty.call(object, key) && key != 'constructor') {
+      result.push(key);
+    }
+  }
+  return result;
+}
+
+/**
+ * Checks if `value` is a valid array-like index.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
+ * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
+ */
+function isIndex(value, length) {
+  length = length == null ? MAX_SAFE_INTEGER : length;
+  return !!length &&
+    (typeof value == 'number' || reIsUint.test(value)) &&
+    (value > -1 && value % 1 == 0 && value < length);
+}
+
+/**
+ * Checks if `value` is likely a prototype object.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a prototype, else `false`.
+ */
+function isPrototype(value) {
+  var Ctor = value && value.constructor,
+      proto = (typeof Ctor == 'function' && Ctor.prototype) || objectProto;
+
+  return value === proto;
+}
+
+/**
+ * Checks if `value` is in `collection`. If `collection` is a string, it's
+ * checked for a substring of `value`, otherwise
+ * [`SameValueZero`](http://ecma-international.org/ecma-262/7.0/#sec-samevaluezero)
+ * is used for equality comparisons. If `fromIndex` is negative, it's used as
+ * the offset from the end of `collection`.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Collection
+ * @param {Array|Object|string} collection The collection to inspect.
+ * @param {*} value The value to search for.
+ * @param {number} [fromIndex=0] The index to search from.
+ * @param- {Object} [guard] Enables use as an iteratee for methods like `_.reduce`.
+ * @returns {boolean} Returns `true` if `value` is found, else `false`.
+ * @example
+ *
+ * _.includes([1, 2, 3], 1);
+ * // => true
+ *
+ * _.includes([1, 2, 3], 1, 2);
+ * // => false
+ *
+ * _.includes({ 'a': 1, 'b': 2 }, 1);
+ * // => true
+ *
+ * _.includes('abcd', 'bc');
+ * // => true
+ */
+function includes(collection, value, fromIndex, guard) {
+  collection = isArrayLike(collection) ? collection : values(collection);
+  fromIndex = (fromIndex && !guard) ? toInteger(fromIndex) : 0;
+
+  var length = collection.length;
+  if (fromIndex < 0) {
+    fromIndex = nativeMax(length + fromIndex, 0);
+  }
+  return isString(collection)
+    ? (fromIndex <= length && collection.indexOf(value, fromIndex) > -1)
+    : (!!length && baseIndexOf(collection, value, fromIndex) > -1);
+}
+
+/**
+ * Checks if `value` is likely an `arguments` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an `arguments` object,
+ *  else `false`.
+ * @example
+ *
+ * _.isArguments(function() { return arguments; }());
+ * // => true
+ *
+ * _.isArguments([1, 2, 3]);
+ * // => false
+ */
+function isArguments(value) {
+  // Safari 8.1 makes `arguments.callee` enumerable in strict mode.
+  return isArrayLikeObject(value) && hasOwnProperty.call(value, 'callee') &&
+    (!propertyIsEnumerable.call(value, 'callee') || objectToString.call(value) == argsTag);
+}
+
+/**
+ * Checks if `value` is classified as an `Array` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an array, else `false`.
+ * @example
+ *
+ * _.isArray([1, 2, 3]);
+ * // => true
+ *
+ * _.isArray(document.body.children);
+ * // => false
+ *
+ * _.isArray('abc');
+ * // => false
+ *
+ * _.isArray(_.noop);
+ * // => false
+ */
+var isArray = Array.isArray;
+
+/**
+ * Checks if `value` is array-like. A value is considered array-like if it's
+ * not a function and has a `value.length` that's an integer greater than or
+ * equal to `0` and less than or equal to `Number.MAX_SAFE_INTEGER`.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is array-like, else `false`.
+ * @example
+ *
+ * _.isArrayLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isArrayLike(document.body.children);
+ * // => true
+ *
+ * _.isArrayLike('abc');
+ * // => true
+ *
+ * _.isArrayLike(_.noop);
+ * // => false
+ */
+function isArrayLike(value) {
+  return value != null && isLength(value.length) && !isFunction(value);
+}
+
+/**
+ * This method is like `_.isArrayLike` except that it also checks if `value`
+ * is an object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an array-like object,
+ *  else `false`.
+ * @example
+ *
+ * _.isArrayLikeObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isArrayLikeObject(document.body.children);
+ * // => true
+ *
+ * _.isArrayLikeObject('abc');
+ * // => false
+ *
+ * _.isArrayLikeObject(_.noop);
+ * // => false
+ */
+function isArrayLikeObject(value) {
+  return isObjectLike(value) && isArrayLike(value);
+}
+
+/**
+ * Checks if `value` is classified as a `Function` object.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a function, else `false`.
+ * @example
+ *
+ * _.isFunction(_);
+ * // => true
+ *
+ * _.isFunction(/abc/);
+ * // => false
+ */
+function isFunction(value) {
+  // The use of `Object#toString` avoids issues with the `typeof` operator
+  // in Safari 8-9 which returns 'object' for typed array and other constructors.
+  var tag = isObject(value) ? objectToString.call(value) : '';
+  return tag == funcTag || tag == genTag;
+}
+
+/**
+ * Checks if `value` is a valid array-like length.
+ *
+ * **Note:** This method is loosely based on
+ * [`ToLength`](http://ecma-international.org/ecma-262/7.0/#sec-tolength).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a valid length, else `false`.
+ * @example
+ *
+ * _.isLength(3);
+ * // => true
+ *
+ * _.isLength(Number.MIN_VALUE);
+ * // => false
+ *
+ * _.isLength(Infinity);
+ * // => false
+ *
+ * _.isLength('3');
+ * // => false
+ */
+function isLength(value) {
+  return typeof value == 'number' &&
+    value > -1 && value % 1 == 0 && value <= MAX_SAFE_INTEGER;
+}
+
+/**
+ * Checks if `value` is the
+ * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+ * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(_.noop);
+ * // => true
+ *
+ * _.isObject(null);
+ * // => false
+ */
+function isObject(value) {
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
+}
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `String` primitive or object.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a string, else `false`.
+ * @example
+ *
+ * _.isString('abc');
+ * // => true
+ *
+ * _.isString(1);
+ * // => false
+ */
+function isString(value) {
+  return typeof value == 'string' ||
+    (!isArray(value) && isObjectLike(value) && objectToString.call(value) == stringTag);
+}
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && objectToString.call(value) == symbolTag);
+}
+
+/**
+ * Converts `value` to a finite number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.12.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {number} Returns the converted number.
+ * @example
+ *
+ * _.toFinite(3.2);
+ * // => 3.2
+ *
+ * _.toFinite(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toFinite(Infinity);
+ * // => 1.7976931348623157e+308
+ *
+ * _.toFinite('3.2');
+ * // => 3.2
+ */
+function toFinite(value) {
+  if (!value) {
+    return value === 0 ? value : 0;
+  }
+  value = toNumber(value);
+  if (value === INFINITY || value === -INFINITY) {
+    var sign = (value < 0 ? -1 : 1);
+    return sign * MAX_INTEGER;
+  }
+  return value === value ? value : 0;
+}
+
+/**
+ * Converts `value` to an integer.
+ *
+ * **Note:** This method is loosely based on
+ * [`ToInteger`](http://www.ecma-international.org/ecma-262/7.0/#sec-tointeger).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {number} Returns the converted integer.
+ * @example
+ *
+ * _.toInteger(3.2);
+ * // => 3
+ *
+ * _.toInteger(Number.MIN_VALUE);
+ * // => 0
+ *
+ * _.toInteger(Infinity);
+ * // => 1.7976931348623157e+308
+ *
+ * _.toInteger('3.2');
+ * // => 3
+ */
+function toInteger(value) {
+  var result = toFinite(value),
+      remainder = result % 1;
+
+  return result === result ? (remainder ? result - remainder : result) : 0;
+}
+
+/**
+ * Converts `value` to a number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to process.
+ * @returns {number} Returns the number.
+ * @example
+ *
+ * _.toNumber(3.2);
+ * // => 3.2
+ *
+ * _.toNumber(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toNumber(Infinity);
+ * // => Infinity
+ *
+ * _.toNumber('3.2');
+ * // => 3.2
+ */
+function toNumber(value) {
+  if (typeof value == 'number') {
+    return value;
+  }
+  if (isSymbol(value)) {
+    return NAN;
+  }
+  if (isObject(value)) {
+    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
+    value = isObject(other) ? (other + '') : other;
+  }
+  if (typeof value != 'string') {
+    return value === 0 ? value : +value;
+  }
+  value = value.replace(reTrim, '');
+  var isBinary = reIsBinary.test(value);
+  return (isBinary || reIsOctal.test(value))
+    ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
+    : (reIsBadHex.test(value) ? NAN : +value);
+}
+
+/**
+ * Creates an array of the own enumerable property names of `object`.
+ *
+ * **Note:** Non-object values are coerced to objects. See the
+ * [ES spec](http://ecma-international.org/ecma-262/7.0/#sec-object.keys)
+ * for more details.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property names.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ *   this.b = 2;
+ * }
+ *
+ * Foo.prototype.c = 3;
+ *
+ * _.keys(new Foo);
+ * // => ['a', 'b'] (iteration order is not guaranteed)
+ *
+ * _.keys('hi');
+ * // => ['0', '1']
+ */
+function keys(object) {
+  return isArrayLike(object) ? arrayLikeKeys(object) : baseKeys(object);
+}
+
+/**
+ * Creates an array of the own enumerable string keyed property values of `object`.
+ *
+ * **Note:** Non-object values are coerced to objects.
+ *
+ * @static
+ * @since 0.1.0
+ * @memberOf _
+ * @category Object
+ * @param {Object} object The object to query.
+ * @returns {Array} Returns the array of property values.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ *   this.b = 2;
+ * }
+ *
+ * Foo.prototype.c = 3;
+ *
+ * _.values(new Foo);
+ * // => [1, 2] (iteration order is not guaranteed)
+ *
+ * _.values('hi');
+ * // => ['h', 'i']
+ */
+function values(object) {
+  return object ? baseValues(object, keys(object)) : [];
+}
+
+module.exports = includes;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash.isboolean/index.js":
+/*!************************************************!*\
+  !*** ./node_modules/lodash.isboolean/index.js ***!
+  \************************************************/
+/***/ ((module) => {
+
+/**
+ * lodash 3.0.3 (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <https://lodash.com/license>
+ */
+
+/** `Object#toString` result references. */
+var boolTag = '[object Boolean]';
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString = objectProto.toString;
+
+/**
+ * Checks if `value` is classified as a boolean primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isBoolean(false);
+ * // => true
+ *
+ * _.isBoolean(null);
+ * // => false
+ */
+function isBoolean(value) {
+  return value === true || value === false ||
+    (isObjectLike(value) && objectToString.call(value) == boolTag);
+}
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+module.exports = isBoolean;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash.isinteger/index.js":
+/*!************************************************!*\
+  !*** ./node_modules/lodash.isinteger/index.js ***!
+  \************************************************/
+/***/ ((module) => {
+
+/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0,
+    MAX_INTEGER = 1.7976931348623157e+308,
+    NAN = 0 / 0;
+
+/** `Object#toString` result references. */
+var symbolTag = '[object Symbol]';
+
+/** Used to match leading and trailing whitespace. */
+var reTrim = /^\s+|\s+$/g;
+
+/** Used to detect bad signed hexadecimal string values. */
+var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
+
+/** Used to detect binary string values. */
+var reIsBinary = /^0b[01]+$/i;
+
+/** Used to detect octal string values. */
+var reIsOctal = /^0o[0-7]+$/i;
+
+/** Built-in method references without a dependency on `root`. */
+var freeParseInt = parseInt;
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString = objectProto.toString;
+
+/**
+ * Checks if `value` is an integer.
+ *
+ * **Note:** This method is based on
+ * [`Number.isInteger`](https://mdn.io/Number/isInteger).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an integer, else `false`.
+ * @example
+ *
+ * _.isInteger(3);
+ * // => true
+ *
+ * _.isInteger(Number.MIN_VALUE);
+ * // => false
+ *
+ * _.isInteger(Infinity);
+ * // => false
+ *
+ * _.isInteger('3');
+ * // => false
+ */
+function isInteger(value) {
+  return typeof value == 'number' && value == toInteger(value);
+}
+
+/**
+ * Checks if `value` is the
+ * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+ * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(_.noop);
+ * // => true
+ *
+ * _.isObject(null);
+ * // => false
+ */
+function isObject(value) {
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
+}
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && objectToString.call(value) == symbolTag);
+}
+
+/**
+ * Converts `value` to a finite number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.12.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {number} Returns the converted number.
+ * @example
+ *
+ * _.toFinite(3.2);
+ * // => 3.2
+ *
+ * _.toFinite(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toFinite(Infinity);
+ * // => 1.7976931348623157e+308
+ *
+ * _.toFinite('3.2');
+ * // => 3.2
+ */
+function toFinite(value) {
+  if (!value) {
+    return value === 0 ? value : 0;
+  }
+  value = toNumber(value);
+  if (value === INFINITY || value === -INFINITY) {
+    var sign = (value < 0 ? -1 : 1);
+    return sign * MAX_INTEGER;
+  }
+  return value === value ? value : 0;
+}
+
+/**
+ * Converts `value` to an integer.
+ *
+ * **Note:** This method is loosely based on
+ * [`ToInteger`](http://www.ecma-international.org/ecma-262/7.0/#sec-tointeger).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {number} Returns the converted integer.
+ * @example
+ *
+ * _.toInteger(3.2);
+ * // => 3
+ *
+ * _.toInteger(Number.MIN_VALUE);
+ * // => 0
+ *
+ * _.toInteger(Infinity);
+ * // => 1.7976931348623157e+308
+ *
+ * _.toInteger('3.2');
+ * // => 3
+ */
+function toInteger(value) {
+  var result = toFinite(value),
+      remainder = result % 1;
+
+  return result === result ? (remainder ? result - remainder : result) : 0;
+}
+
+/**
+ * Converts `value` to a number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to process.
+ * @returns {number} Returns the number.
+ * @example
+ *
+ * _.toNumber(3.2);
+ * // => 3.2
+ *
+ * _.toNumber(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toNumber(Infinity);
+ * // => Infinity
+ *
+ * _.toNumber('3.2');
+ * // => 3.2
+ */
+function toNumber(value) {
+  if (typeof value == 'number') {
+    return value;
+  }
+  if (isSymbol(value)) {
+    return NAN;
+  }
+  if (isObject(value)) {
+    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
+    value = isObject(other) ? (other + '') : other;
+  }
+  if (typeof value != 'string') {
+    return value === 0 ? value : +value;
+  }
+  value = value.replace(reTrim, '');
+  var isBinary = reIsBinary.test(value);
+  return (isBinary || reIsOctal.test(value))
+    ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
+    : (reIsBadHex.test(value) ? NAN : +value);
+}
+
+module.exports = isInteger;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash.isnumber/index.js":
+/*!***********************************************!*\
+  !*** ./node_modules/lodash.isnumber/index.js ***!
+  \***********************************************/
+/***/ ((module) => {
+
+/**
+ * lodash 3.0.3 (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <https://lodash.com/license>
+ */
+
+/** `Object#toString` result references. */
+var numberTag = '[object Number]';
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString = objectProto.toString;
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `Number` primitive or object.
+ *
+ * **Note:** To exclude `Infinity`, `-Infinity`, and `NaN`, which are classified
+ * as numbers, use the `_.isFinite` method.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isNumber(3);
+ * // => true
+ *
+ * _.isNumber(Number.MIN_VALUE);
+ * // => true
+ *
+ * _.isNumber(Infinity);
+ * // => true
+ *
+ * _.isNumber('3');
+ * // => false
+ */
+function isNumber(value) {
+  return typeof value == 'number' ||
+    (isObjectLike(value) && objectToString.call(value) == numberTag);
+}
+
+module.exports = isNumber;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash.isplainobject/index.js":
+/*!****************************************************!*\
+  !*** ./node_modules/lodash.isplainobject/index.js ***!
+  \****************************************************/
+/***/ ((module) => {
+
+/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+
+/** `Object#toString` result references. */
+var objectTag = '[object Object]';
+
+/**
+ * Checks if `value` is a host object in IE < 9.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a host object, else `false`.
+ */
+function isHostObject(value) {
+  // Many host objects are `Object` objects that can coerce to strings
+  // despite having improperly defined `toString` methods.
+  var result = false;
+  if (value != null && typeof value.toString != 'function') {
+    try {
+      result = !!(value + '');
+    } catch (e) {}
+  }
+  return result;
+}
+
+/**
+ * Creates a unary function that invokes `func` with its argument transformed.
+ *
+ * @private
+ * @param {Function} func The function to wrap.
+ * @param {Function} transform The argument transform.
+ * @returns {Function} Returns the new function.
+ */
+function overArg(func, transform) {
+  return function(arg) {
+    return func(transform(arg));
+  };
+}
+
+/** Used for built-in method references. */
+var funcProto = Function.prototype,
+    objectProto = Object.prototype;
+
+/** Used to resolve the decompiled source of functions. */
+var funcToString = funcProto.toString;
+
+/** Used to check objects for own properties. */
+var hasOwnProperty = objectProto.hasOwnProperty;
+
+/** Used to infer the `Object` constructor. */
+var objectCtorString = funcToString.call(Object);
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString = objectProto.toString;
+
+/** Built-in value references. */
+var getPrototype = overArg(Object.getPrototypeOf, Object);
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is a plain object, that is, an object created by the
+ * `Object` constructor or one with a `[[Prototype]]` of `null`.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.8.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a plain object, else `false`.
+ * @example
+ *
+ * function Foo() {
+ *   this.a = 1;
+ * }
+ *
+ * _.isPlainObject(new Foo);
+ * // => false
+ *
+ * _.isPlainObject([1, 2, 3]);
+ * // => false
+ *
+ * _.isPlainObject({ 'x': 0, 'y': 0 });
+ * // => true
+ *
+ * _.isPlainObject(Object.create(null));
+ * // => true
+ */
+function isPlainObject(value) {
+  if (!isObjectLike(value) ||
+      objectToString.call(value) != objectTag || isHostObject(value)) {
+    return false;
+  }
+  var proto = getPrototype(value);
+  if (proto === null) {
+    return true;
+  }
+  var Ctor = hasOwnProperty.call(proto, 'constructor') && proto.constructor;
+  return (typeof Ctor == 'function' &&
+    Ctor instanceof Ctor && funcToString.call(Ctor) == objectCtorString);
+}
+
+module.exports = isPlainObject;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash.isstring/index.js":
+/*!***********************************************!*\
+  !*** ./node_modules/lodash.isstring/index.js ***!
+  \***********************************************/
+/***/ ((module) => {
+
+/**
+ * lodash 4.0.1 (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright 2012-2016 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2016 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <https://lodash.com/license>
+ */
+
+/** `Object#toString` result references. */
+var stringTag = '[object String]';
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the [`toStringTag`](http://ecma-international.org/ecma-262/6.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString = objectProto.toString;
+
+/**
+ * Checks if `value` is classified as an `Array` object.
+ *
+ * @static
+ * @memberOf _
+ * @type Function
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isArray([1, 2, 3]);
+ * // => true
+ *
+ * _.isArray(document.body.children);
+ * // => false
+ *
+ * _.isArray('abc');
+ * // => false
+ *
+ * _.isArray(_.noop);
+ * // => false
+ */
+var isArray = Array.isArray;
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `String` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+ * @example
+ *
+ * _.isString('abc');
+ * // => true
+ *
+ * _.isString(1);
+ * // => false
+ */
+function isString(value) {
+  return typeof value == 'string' ||
+    (!isArray(value) && isObjectLike(value) && objectToString.call(value) == stringTag);
+}
+
+module.exports = isString;
+
+
+/***/ }),
+
+/***/ "./node_modules/lodash.once/index.js":
+/*!*******************************************!*\
+  !*** ./node_modules/lodash.once/index.js ***!
+  \*******************************************/
+/***/ ((module) => {
+
+/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+
+/** Used as the `TypeError` message for "Functions" methods. */
+var FUNC_ERROR_TEXT = 'Expected a function';
+
+/** Used as references for various `Number` constants. */
+var INFINITY = 1 / 0,
+    MAX_INTEGER = 1.7976931348623157e+308,
+    NAN = 0 / 0;
+
+/** `Object#toString` result references. */
+var symbolTag = '[object Symbol]';
+
+/** Used to match leading and trailing whitespace. */
+var reTrim = /^\s+|\s+$/g;
+
+/** Used to detect bad signed hexadecimal string values. */
+var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
+
+/** Used to detect binary string values. */
+var reIsBinary = /^0b[01]+$/i;
+
+/** Used to detect octal string values. */
+var reIsOctal = /^0o[0-7]+$/i;
+
+/** Built-in method references without a dependency on `root`. */
+var freeParseInt = parseInt;
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString = objectProto.toString;
+
+/**
+ * Creates a function that invokes `func`, with the `this` binding and arguments
+ * of the created function, while it's called less than `n` times. Subsequent
+ * calls to the created function return the result of the last `func` invocation.
+ *
+ * @static
+ * @memberOf _
+ * @since 3.0.0
+ * @category Function
+ * @param {number} n The number of calls at which `func` is no longer invoked.
+ * @param {Function} func The function to restrict.
+ * @returns {Function} Returns the new restricted function.
+ * @example
+ *
+ * jQuery(element).on('click', _.before(5, addContactToList));
+ * // => Allows adding up to 4 contacts to the list.
+ */
+function before(n, func) {
+  var result;
+  if (typeof func != 'function') {
+    throw new TypeError(FUNC_ERROR_TEXT);
+  }
+  n = toInteger(n);
+  return function() {
+    if (--n > 0) {
+      result = func.apply(this, arguments);
+    }
+    if (n <= 1) {
+      func = undefined;
+    }
+    return result;
+  };
+}
+
+/**
+ * Creates a function that is restricted to invoking `func` once. Repeat calls
+ * to the function return the value of the first invocation. The `func` is
+ * invoked with the `this` binding and arguments of the created function.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Function
+ * @param {Function} func The function to restrict.
+ * @returns {Function} Returns the new restricted function.
+ * @example
+ *
+ * var initialize = _.once(createApplication);
+ * initialize();
+ * initialize();
+ * // => `createApplication` is invoked once
+ */
+function once(func) {
+  return before(2, func);
+}
+
+/**
+ * Checks if `value` is the
+ * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+ * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(_.noop);
+ * // => true
+ *
+ * _.isObject(null);
+ * // => false
+ */
+function isObject(value) {
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
+}
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && objectToString.call(value) == symbolTag);
+}
+
+/**
+ * Converts `value` to a finite number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.12.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {number} Returns the converted number.
+ * @example
+ *
+ * _.toFinite(3.2);
+ * // => 3.2
+ *
+ * _.toFinite(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toFinite(Infinity);
+ * // => 1.7976931348623157e+308
+ *
+ * _.toFinite('3.2');
+ * // => 3.2
+ */
+function toFinite(value) {
+  if (!value) {
+    return value === 0 ? value : 0;
+  }
+  value = toNumber(value);
+  if (value === INFINITY || value === -INFINITY) {
+    var sign = (value < 0 ? -1 : 1);
+    return sign * MAX_INTEGER;
+  }
+  return value === value ? value : 0;
+}
+
+/**
+ * Converts `value` to an integer.
+ *
+ * **Note:** This method is loosely based on
+ * [`ToInteger`](http://www.ecma-international.org/ecma-262/7.0/#sec-tointeger).
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to convert.
+ * @returns {number} Returns the converted integer.
+ * @example
+ *
+ * _.toInteger(3.2);
+ * // => 3
+ *
+ * _.toInteger(Number.MIN_VALUE);
+ * // => 0
+ *
+ * _.toInteger(Infinity);
+ * // => 1.7976931348623157e+308
+ *
+ * _.toInteger('3.2');
+ * // => 3
+ */
+function toInteger(value) {
+  var result = toFinite(value),
+      remainder = result % 1;
+
+  return result === result ? (remainder ? result - remainder : result) : 0;
+}
+
+/**
+ * Converts `value` to a number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to process.
+ * @returns {number} Returns the number.
+ * @example
+ *
+ * _.toNumber(3.2);
+ * // => 3.2
+ *
+ * _.toNumber(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toNumber(Infinity);
+ * // => Infinity
+ *
+ * _.toNumber('3.2');
+ * // => 3.2
+ */
+function toNumber(value) {
+  if (typeof value == 'number') {
+    return value;
+  }
+  if (isSymbol(value)) {
+    return NAN;
+  }
+  if (isObject(value)) {
+    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
+    value = isObject(other) ? (other + '') : other;
+  }
+  if (typeof value != 'string') {
+    return value === 0 ? value : +value;
+  }
+  value = value.replace(reTrim, '');
+  var isBinary = reIsBinary.test(value);
+  return (isBinary || reIsOctal.test(value))
+    ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
+    : (reIsBadHex.test(value) ? NAN : +value);
+}
+
+module.exports = once;
+
+
+/***/ }),
+
+/***/ "./node_modules/passport-jwt/lib/auth_header.js":
+/*!******************************************************!*\
+  !*** ./node_modules/passport-jwt/lib/auth_header.js ***!
+  \******************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+
+var re = /(\S+)\s+(\S+)/;
+
+
+
+function parseAuthHeader(hdrValue) {
+    if (typeof hdrValue !== 'string') {
+        return null;
+    }
+    var matches = hdrValue.match(re);
+    return matches && { scheme: matches[1], value: matches[2] };
+}
+
+
+
+module.exports = {
+    parse: parseAuthHeader
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/passport-jwt/lib/extract_jwt.js":
+/*!******************************************************!*\
+  !*** ./node_modules/passport-jwt/lib/extract_jwt.js ***!
+  \******************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var url = __webpack_require__(/*! url */ "url"),
+    auth_hdr = __webpack_require__(/*! ./auth_header */ "./node_modules/passport-jwt/lib/auth_header.js");
+
+// Note: express http converts all headers
+// to lower case.
+var AUTH_HEADER = "authorization",
+    LEGACY_AUTH_SCHEME = "JWT", 
+    BEARER_AUTH_SCHEME = 'bearer';
+
+
+var extractors = {};
+
+
+extractors.fromHeader = function (header_name) {
+    return function (request) {
+        var token = null;
+        if (request.headers[header_name]) {
+            token = request.headers[header_name];
+        }
+        return token;
+    };
+};
+
+
+
+extractors.fromBodyField = function (field_name) {
+    return function (request) {
+        var token = null;
+        if (request.body && Object.prototype.hasOwnProperty.call(request.body, field_name)) {
+            token = request.body[field_name];
+        }
+        return token;
+    };
+};
+
+
+
+extractors.fromUrlQueryParameter = function (param_name) {
+    return function (request) {
+        var token = null,
+            parsed_url = url.parse(request.url, true);
+        if (parsed_url.query && Object.prototype.hasOwnProperty.call(parsed_url.query, param_name)) {
+            token = parsed_url.query[param_name];
+        }
+        return token;
+    };
+};
+
+
+
+extractors.fromAuthHeaderWithScheme = function (auth_scheme) {
+    var auth_scheme_lower = auth_scheme.toLowerCase();
+    return function (request) {
+
+        var token = null;
+        if (request.headers[AUTH_HEADER]) {
+            var auth_params = auth_hdr.parse(request.headers[AUTH_HEADER]);
+            if (auth_params && auth_scheme_lower === auth_params.scheme.toLowerCase()) {
+                token = auth_params.value;
+            }
+        }
+        return token;
+    };
+};
+
+
+
+extractors.fromAuthHeaderAsBearerToken = function () {
+    return extractors.fromAuthHeaderWithScheme(BEARER_AUTH_SCHEME);
+};
+
+
+extractors.fromExtractors = function(extractors) {
+    if (!Array.isArray(extractors)) {
+        throw new TypeError('extractors.fromExtractors expects an array')
+    }
+    
+    return function (request) {
+        var token = null;
+        var index = 0;
+        while(!token && index < extractors.length) {
+            token = extractors[index].call(this, request);
+            index ++;
+        }
+        return token;
+    }
+};
+
+
+/**
+ * This extractor mimics the behavior of the v1.*.* extraction logic.
+ *
+ * This extractor exists only to provide an easy transition from the v1.*.* API to the v2.0.0
+ * API.
+ *
+ * This extractor first checks the auth header, if it doesn't find a token there then it checks the 
+ * specified body field and finally the url query parameters.
+ * 
+ * @param options
+ *          authScheme: Expected scheme when JWT can be found in HTTP Authorize header. Default is JWT. 
+ *          tokenBodyField: Field in request body containing token. Default is auth_token.
+ *          tokenQueryParameterName: Query parameter name containing the token. Default is auth_token.
+ */
+extractors.versionOneCompatibility = function (options) {
+    var authScheme = options.authScheme || LEGACY_AUTH_SCHEME,
+        bodyField = options.tokenBodyField || 'auth_token',
+        queryParam = options.tokenQueryParameterName || 'auth_token';
+
+    return function (request) {
+        var authHeaderExtractor = extractors.fromAuthHeaderWithScheme(authScheme);
+        var token =  authHeaderExtractor(request);
+        
+        if (!token) {
+            var bodyExtractor = extractors.fromBodyField(bodyField);
+            token = bodyExtractor(request);
+        }
+
+        if (!token) {
+            var queryExtractor = extractors.fromUrlQueryParameter(queryParam);
+            token = queryExtractor(request);
+        }
+
+        return token;
+    };
+}
+
+
+
+/**
+ * Export the Jwt extraction functions
+ */
+module.exports = extractors;
+
+
+/***/ }),
+
+/***/ "./node_modules/passport-jwt/lib/helpers/assign.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/passport-jwt/lib/helpers/assign.js ***!
+  \*********************************************************/
+/***/ ((module) => {
+
+// note: This is a polyfill to Object.assign to support old nodejs versions (0.10 / 0.12) where
+// Object.assign doesn't exist.
+// Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/assign
+module.exports = function(target, varArgs) {
+  if (target == null) { // TypeError if undefined or null
+    throw new TypeError('Cannot convert undefined or null to object');
+  }
+
+  var to = Object(target);
+
+  for (var index = 1; index < arguments.length; index++) {
+    var nextSource = arguments[index];
+
+    if (nextSource != null) { // Skip over if undefined or null
+      for (var nextKey in nextSource) {
+        // Avoid bugs when hasOwnProperty is shadowed
+        if (Object.prototype.hasOwnProperty.call(nextSource, nextKey)) {
+          to[nextKey] = nextSource[nextKey];
+        }
+      }
+    }
+  }
+  return to;
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/passport-jwt/lib/index.js":
+/*!************************************************!*\
+  !*** ./node_modules/passport-jwt/lib/index.js ***!
+  \************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+
+var Strategy = __webpack_require__(/*! ./strategy */ "./node_modules/passport-jwt/lib/strategy.js"),
+    ExtractJwt = __webpack_require__(/*! ./extract_jwt.js */ "./node_modules/passport-jwt/lib/extract_jwt.js");
+
+
+module.exports = {
+    Strategy: Strategy,
+    ExtractJwt : ExtractJwt
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/passport-jwt/lib/strategy.js":
+/*!***************************************************!*\
+  !*** ./node_modules/passport-jwt/lib/strategy.js ***!
+  \***************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var passport = __webpack_require__(/*! passport-strategy */ "./node_modules/passport-strategy/lib/index.js")
+    , auth_hdr = __webpack_require__(/*! ./auth_header */ "./node_modules/passport-jwt/lib/auth_header.js")
+    , util = __webpack_require__(/*! util */ "util")
+    , url = __webpack_require__(/*! url */ "url")
+    , assign = __webpack_require__(/*! ./helpers/assign.js */ "./node_modules/passport-jwt/lib/helpers/assign.js");
+
+
+
+/**
+ * Strategy constructor
+ *
+ * @param options
+ *          secretOrKey: String or buffer containing the secret or PEM-encoded public key. Required unless secretOrKeyProvider is provided.
+ *          secretOrKeyProvider: callback in the format secretOrKeyProvider(request, rawJwtToken, done)`,
+ *                               which should call done with a secret or PEM-encoded public key
+ *                               (asymmetric) for the given undecoded jwt token string and  request
+ *                               combination. done has the signature function done(err, secret).
+ *                               REQUIRED unless `secretOrKey` is provided.
+ *          jwtFromRequest: (REQUIRED) Function that accepts a request as the only parameter and returns the either JWT as a string or null
+ *          issuer: If defined issuer will be verified against this value
+ *          audience: If defined audience will be verified against this value
+ *          algorithms: List of strings with the names of the allowed algorithms. For instance, ["HS256", "HS384"].
+ *          ignoreExpiration: if true do not validate the expiration of the token.
+ *          passReqToCallback: If true the verify callback will be called with args (request, jwt_payload, done_callback).
+ * @param verify - Verify callback with args (jwt_payload, done_callback) if passReqToCallback is false,
+ *                 (request, jwt_payload, done_callback) if true.
+ */
+function JwtStrategy(options, verify) {
+
+    passport.Strategy.call(this);
+    this.name = 'jwt';
+
+    this._secretOrKeyProvider = options.secretOrKeyProvider;
+
+    if (options.secretOrKey) {
+        if (this._secretOrKeyProvider) {
+          	throw new TypeError('JwtStrategy has been given both a secretOrKey and a secretOrKeyProvider');
+        }
+        this._secretOrKeyProvider = function (request, rawJwtToken, done) {
+            done(null, options.secretOrKey)
+        };
+    }
+
+    if (!this._secretOrKeyProvider) {
+        throw new TypeError('JwtStrategy requires a secret or key');
+    }
+
+    this._verify = verify;
+    if (!this._verify) {
+        throw new TypeError('JwtStrategy requires a verify callback');
+    }
+
+    this._jwtFromRequest = options.jwtFromRequest;
+    if (!this._jwtFromRequest) {
+        throw new TypeError('JwtStrategy requires a function to retrieve jwt from requests (see option jwtFromRequest)');
+    }
+
+    this._passReqToCallback = options.passReqToCallback;
+    var jsonWebTokenOptions = options.jsonWebTokenOptions || {};
+    //for backwards compatibility, still allowing you to pass
+    //audience / issuer / algorithms / ignoreExpiration
+    //on the options.
+    this._verifOpts = assign({}, jsonWebTokenOptions, {
+      audience: options.audience,
+      issuer: options.issuer,
+      algorithms: options.algorithms,
+      ignoreExpiration: !!options.ignoreExpiration
+    });
+
+}
+util.inherits(JwtStrategy, passport.Strategy);
+
+
+
+/**
+ * Allow for injection of JWT Verifier.
+ *
+ * This improves testability by allowing tests to cleanly isolate failures in the JWT Verification
+ * process from failures in the passport related mechanics of authentication.
+ *
+ * Note that this should only be replaced in tests.
+ */
+JwtStrategy.JwtVerifier = __webpack_require__(/*! ./verify_jwt */ "./node_modules/passport-jwt/lib/verify_jwt.js");
+
+
+
+/**
+ * Authenticate request based on JWT obtained from header or post body
+ */
+JwtStrategy.prototype.authenticate = function(req, options) {
+    var self = this;
+
+    var token = self._jwtFromRequest(req);
+
+    if (!token) {
+        return self.fail(new Error("No auth token"));
+    }
+
+    this._secretOrKeyProvider(req, token, function(secretOrKeyError, secretOrKey) {
+        if (secretOrKeyError) {
+            self.fail(secretOrKeyError)
+        } else {
+            // Verify the JWT
+            JwtStrategy.JwtVerifier(token, secretOrKey, self._verifOpts, function(jwt_err, payload) {
+                if (jwt_err) {
+                    return self.fail(jwt_err);
+                } else {
+                    // Pass the parsed token to the user
+                    var verified = function(err, user, info) {
+                        if(err) {
+                            return self.error(err);
+                        } else if (!user) {
+                            return self.fail(info);
+                        } else {
+                            return self.success(user, info);
+                        }
+                    };
+
+                    try {
+                        if (self._passReqToCallback) {
+                            self._verify(req, payload, verified);
+                        } else {
+                            self._verify(payload, verified);
+                        }
+                    } catch(ex) {
+                        self.error(ex);
+                    }
+                }
+            });
+        }
+    });
+};
+
+
+
+/**
+ * Export the Jwt Strategy
+ */
+ module.exports = JwtStrategy;
+
+
+/***/ }),
+
+/***/ "./node_modules/passport-jwt/lib/verify_jwt.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/passport-jwt/lib/verify_jwt.js ***!
+  \*****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var jwt = __webpack_require__(/*! jsonwebtoken */ "./node_modules/jsonwebtoken/index.js");
+
+module.exports  = function(token, secretOrKey, options, callback) {
+    return jwt.verify(token, secretOrKey, options, callback);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/passport-strategy/lib/index.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/passport-strategy/lib/index.js ***!
+  \*****************************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+/**
+ * Module dependencies.
+ */
+var Strategy = __webpack_require__(/*! ./strategy */ "./node_modules/passport-strategy/lib/strategy.js");
+
+
+/**
+ * Expose `Strategy` directly from package.
+ */
+exports = module.exports = Strategy;
+
+/**
+ * Export constructors.
+ */
+exports.Strategy = Strategy;
+
+
+/***/ }),
+
+/***/ "./node_modules/passport-strategy/lib/strategy.js":
+/*!********************************************************!*\
+  !*** ./node_modules/passport-strategy/lib/strategy.js ***!
+  \********************************************************/
+/***/ ((module) => {
+
+/**
+ * Creates an instance of `Strategy`.
+ *
+ * @constructor
+ * @api public
+ */
+function Strategy() {
+}
+
+/**
+ * Authenticate request.
+ *
+ * This function must be overridden by subclasses.  In abstract form, it always
+ * throws an exception.
+ *
+ * @param {Object} req The request to authenticate.
+ * @param {Object} [options] Strategy-specific options.
+ * @api public
+ */
+Strategy.prototype.authenticate = function(req, options) {
+  throw new Error('Strategy#authenticate must be overridden by subclass');
+};
+
+
+/**
+ * Expose `Strategy`.
+ */
+module.exports = Strategy;
+
+
+/***/ }),
+
+/***/ "./node_modules/passport/lib/authenticator.js":
+/*!****************************************************!*\
+  !*** ./node_modules/passport/lib/authenticator.js ***!
+  \****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Module dependencies.
+var SessionStrategy = __webpack_require__(/*! ./strategies/session */ "./node_modules/passport/lib/strategies/session.js")
+  , SessionManager = __webpack_require__(/*! ./sessionmanager */ "./node_modules/passport/lib/sessionmanager.js");
+
+
+/**
+ * Create a new `Authenticator` object.
+ *
+ * @public
+ * @class
+ */
+function Authenticator() {
+  this._key = 'passport';
+  this._strategies = {};
+  this._serializers = [];
+  this._deserializers = [];
+  this._infoTransformers = [];
+  this._framework = null;
+  
+  this.init();
+}
+
+/**
+ * Initialize authenticator.
+ *
+ * Initializes the `Authenticator` instance by creating the default `{@link SessionManager}`,
+ * {@link Authenticator#use `use()`}'ing the default `{@link SessionStrategy}`, and
+ * adapting it to work as {@link https://github.com/senchalabs/connect#readme Connect}-style
+ * middleware, which is also compatible with {@link https://expressjs.com/ Express}.
+ *
+ * @private
+ */
+Authenticator.prototype.init = function() {
+  this.framework(__webpack_require__(/*! ./framework/connect */ "./node_modules/passport/lib/framework/connect.js")());
+  this.use(new SessionStrategy({ key: this._key }, this.deserializeUser.bind(this)));
+  this._sm = new SessionManager({ key: this._key }, this.serializeUser.bind(this));
+};
+
+/**
+ * Register a strategy for later use when authenticating requests.  The name
+ * with which the strategy is registered is passed to {@link Authenticator#authenticate `authenticate()`}.
+ *
+ * @public
+ * @param {string} [name=strategy.name] - Name of the strategy.  When specified,
+ *          this value overrides the strategy's name.
+ * @param {Strategy} strategy - Authentication strategy.
+ * @returns {this}
+ *
+ * @example <caption>Register strategy.</caption>
+ * passport.use(new GoogleStrategy(...));
+ *
+ * @example <caption>Register strategy and override name.</caption>
+ * passport.use('password', new LocalStrategy(function(username, password, cb) {
+ *   // ...
+ * }));
+ */
+Authenticator.prototype.use = function(name, strategy) {
+  if (!strategy) {
+    strategy = name;
+    name = strategy.name;
+  }
+  if (!name) { throw new Error('Authentication strategies must have a name'); }
+  
+  this._strategies[name] = strategy;
+  return this;
+};
+
+/**
+ * Deregister a strategy that was previously registered with the given name.
+ *
+ * In a typical application, the necessary authentication strategies are
+ * registered when initializing the app and, once registered, are always
+ * available.  As such, it is typically not necessary to call this function.
+ *
+ * @public
+ * @param {string} name - Name of the strategy.
+ * @returns {this}
+ *
+ * @example
+ * passport.unuse('acme');
+ */
+Authenticator.prototype.unuse = function(name) {
+  delete this._strategies[name];
+  return this;
+};
+
+/**
+ * Adapt this `Authenticator` to work with a specific framework.
+ *
+ * By default, Passport works as {@link https://github.com/senchalabs/connect#readme Connect}-style
+ * middleware, which makes it compatible with {@link https://expressjs.com/ Express}.
+ * For any app built using Express, there is no need to call this function.
+ *
+ * @public
+ * @param {Object} fw
+ * @returns {this}
+ */
+Authenticator.prototype.framework = function(fw) {
+  this._framework = fw;
+  return this;
+};
+
+/**
+ * Create initialization middleware.
+ *
+ * Returns middleware that initializes Passport to authenticate requests.
+ *
+ * As of v0.6.x, it is typically no longer necessary to use this middleware.  It
+ * exists for compatiblity with apps built using previous versions of Passport,
+ * in which this middleware was necessary.
+ *
+ * The primary exception to the above guidance is when using strategies that
+ * depend directly on `passport@0.4.x` or earlier.  These earlier versions of
+ * Passport monkeypatch Node.js `http.IncomingMessage` in a way that expects
+ * certain Passport-specific properties to be available.  This middleware
+ * provides a compatibility layer for this situation.
+ *
+ * @public
+ * @param {Object} [options]
+ * @param {string} [options.userProperty='user'] - Determines what property on
+ *          `req` will be set to the authenticated user object.
+ * @param {boolean} [options.compat=true] - When `true`, enables a compatibility
+ *          layer for packages that depend on `passport@0.4.x` or earlier.
+ * @returns {function}
+ *
+ * @example
+ * app.use(passport.initialize());
+ */
+Authenticator.prototype.initialize = function(options) {
+  options = options || {};
+  return this._framework.initialize(this, options);
+};
+
+/**
+ * Create authentication middleware.
+ *
+ * Returns middleware that authenticates the request by applying the given
+ * strategy (or strategies).
+ *
+ * Examples:
+ *
+ *     passport.authenticate('local', function(err, user) {
+ *       if (!user) { return res.redirect('/login'); }
+ *       res.end('Authenticated!');
+ *     })(req, res);
+ *
+ * @public
+ * @param {string|string[]|Strategy} strategy
+ * @param {Object} [options]
+ * @param {boolean} [options.session=true]
+ * @param {boolean} [options.keepSessionInfo=false]
+ * @param {string} [options.failureRedirect]
+ * @param {boolean|string|Object} [options.failureFlash=false]
+ * @param {boolean|string} [options.failureMessage=false]
+ * @param {boolean|string|Object} [options.successFlash=false]
+ * @param {string} [options.successReturnToOrRedirect]
+ * @param {string} [options.successRedirect]
+ * @param {boolean|string} [options.successMessage=false]
+ * @param {boolean} [options.failWithError=false]
+ * @param {string} [options.assignProperty]
+ * @param {boolean} [options.authInfo=true]
+ * @param {function} [callback]
+ * @returns {function}
+ *
+ * @example <caption>Authenticate username and password submitted via HTML form.</caption>
+ * app.get('/login/password', passport.authenticate('local', { successRedirect: '/', failureRedirect: '/login' }));
+ *
+ * @example <caption>Authenticate bearer token used to access an API resource.</caption>
+ * app.get('/api/resource', passport.authenticate('bearer', { session: false }));
+ */
+Authenticator.prototype.authenticate = function(strategy, options, callback) {
+  return this._framework.authenticate(this, strategy, options, callback);
+};
+
+/**
+ * Create third-party service authorization middleware.
+ *
+ * Returns middleware that will authorize a connection to a third-party service.
+ *
+ * This middleware is identical to using {@link Authenticator#authenticate `authenticate()`}
+ * middleware with the `assignProperty` option set to `'account'`.  This is
+ * useful when a user is already authenticated (for example, using a username
+ * and password) and they want to connect their account with a third-party
+ * service.
+ *
+ * In this scenario, the user's third-party account will be set at
+ * `req.account`, and the existing `req.user` and login session data will be
+ * be left unmodified.  A route handler can then link the third-party account to
+ * the existing local account.
+ *
+ * All arguments to this function behave identically to those accepted by
+ * `{@link Authenticator#authenticate}`.
+ *
+ * @public
+ * @param {string|string[]|Strategy} strategy
+ * @param {Object} [options]
+ * @param {function} [callback]
+ * @returns {function}
+ *
+ * @example
+ * app.get('/oauth/callback/twitter', passport.authorize('twitter'));
+ */
+Authenticator.prototype.authorize = function(strategy, options, callback) {
+  options = options || {};
+  options.assignProperty = 'account';
+  
+  var fn = this._framework.authorize || this._framework.authenticate;
+  return fn(this, strategy, options, callback);
+};
+
+/**
+ * Middleware that will restore login state from a session.
+ *
+ * Web applications typically use sessions to maintain login state between
+ * requests.  For example, a user will authenticate by entering credentials into
+ * a form which is submitted to the server.  If the credentials are valid, a
+ * login session is established by setting a cookie containing a session
+ * identifier in the user's web browser.  The web browser will send this cookie
+ * in subsequent requests to the server, allowing a session to be maintained.
+ *
+ * If sessions are being utilized, and a login session has been established,
+ * this middleware will populate `req.user` with the current user.
+ *
+ * Note that sessions are not strictly required for Passport to operate.
+ * However, as a general rule, most web applications will make use of sessions.
+ * An exception to this rule would be an API server, which expects each HTTP
+ * request to provide credentials in an Authorization header.
+ *
+ * Examples:
+ *
+ *     app.use(connect.cookieParser());
+ *     app.use(connect.session({ secret: 'keyboard cat' }));
+ *     app.use(passport.initialize());
+ *     app.use(passport.session());
+ *
+ * Options:
+ *   - `pauseStream`      Pause the request stream before deserializing the user
+ *                        object from the session.  Defaults to _false_.  Should
+ *                        be set to true in cases where middleware consuming the
+ *                        request body is configured after passport and the
+ *                        deserializeUser method is asynchronous.
+ *
+ * @param {Object} options
+ * @return {Function} middleware
+ * @api public
+ */
+Authenticator.prototype.session = function(options) {
+  return this.authenticate('session', options);
+};
+
+// TODO: Make session manager pluggable
+/*
+Authenticator.prototype.sessionManager = function(mgr) {
+  this._sm = mgr;
+  return this;
+}
+*/
+
+/**
+ * Registers a function used to serialize user objects into the session.
+ *
+ * Examples:
+ *
+ *     passport.serializeUser(function(user, done) {
+ *       done(null, user.id);
+ *     });
+ *
+ * @api public
+ */
+Authenticator.prototype.serializeUser = function(fn, req, done) {
+  if (typeof fn === 'function') {
+    return this._serializers.push(fn);
+  }
+  
+  // private implementation that traverses the chain of serializers, attempting
+  // to serialize a user
+  var user = fn;
+
+  // For backwards compatibility
+  if (typeof req === 'function') {
+    done = req;
+    req = undefined;
+  }
+  
+  var stack = this._serializers;
+  (function pass(i, err, obj) {
+    // serializers use 'pass' as an error to skip processing
+    if ('pass' === err) {
+      err = undefined;
+    }
+    // an error or serialized object was obtained, done
+    if (err || obj || obj === 0) { return done(err, obj); }
+    
+    var layer = stack[i];
+    if (!layer) {
+      return done(new Error('Failed to serialize user into session'));
+    }
+    
+    
+    function serialized(e, o) {
+      pass(i + 1, e, o);
+    }
+    
+    try {
+      var arity = layer.length;
+      if (arity == 3) {
+        layer(req, user, serialized);
+      } else {
+        layer(user, serialized);
+      }
+    } catch(e) {
+      return done(e);
+    }
+  })(0);
+};
+
+/**
+ * Registers a function used to deserialize user objects out of the session.
+ *
+ * Examples:
+ *
+ *     passport.deserializeUser(function(id, done) {
+ *       User.findById(id, function (err, user) {
+ *         done(err, user);
+ *       });
+ *     });
+ *
+ * @api public
+ */
+Authenticator.prototype.deserializeUser = function(fn, req, done) {
+  if (typeof fn === 'function') {
+    return this._deserializers.push(fn);
+  }
+  
+  // private implementation that traverses the chain of deserializers,
+  // attempting to deserialize a user
+  var obj = fn;
+
+  // For backwards compatibility
+  if (typeof req === 'function') {
+    done = req;
+    req = undefined;
+  }
+  
+  var stack = this._deserializers;
+  (function pass(i, err, user) {
+    // deserializers use 'pass' as an error to skip processing
+    if ('pass' === err) {
+      err = undefined;
+    }
+    // an error or deserialized user was obtained, done
+    if (err || user) { return done(err, user); }
+    // a valid user existed when establishing the session, but that user has
+    // since been removed
+    if (user === null || user === false) { return done(null, false); }
+    
+    var layer = stack[i];
+    if (!layer) {
+      return done(new Error('Failed to deserialize user out of session'));
+    }
+    
+    
+    function deserialized(e, u) {
+      pass(i + 1, e, u);
+    }
+    
+    try {
+      var arity = layer.length;
+      if (arity == 3) {
+        layer(req, obj, deserialized);
+      } else {
+        layer(obj, deserialized);
+      }
+    } catch(e) {
+      return done(e);
+    }
+  })(0);
+};
+
+/**
+ * Registers a function used to transform auth info.
+ *
+ * In some circumstances authorization details are contained in authentication
+ * credentials or loaded as part of verification.
+ *
+ * For example, when using bearer tokens for API authentication, the tokens may
+ * encode (either directly or indirectly in a database), details such as scope
+ * of access or the client to which the token was issued.
+ *
+ * Such authorization details should be enforced separately from authentication.
+ * Because Passport deals only with the latter, this is the responsiblity of
+ * middleware or routes further along the chain.  However, it is not optimal to
+ * decode the same data or execute the same database query later.  To avoid
+ * this, Passport accepts optional `info` along with the authenticated `user`
+ * in a strategy's `success()` action.  This info is set at `req.authInfo`,
+ * where said later middlware or routes can access it.
+ *
+ * Optionally, applications can register transforms to proccess this info,
+ * which take effect prior to `req.authInfo` being set.  This is useful, for
+ * example, when the info contains a client ID.  The transform can load the
+ * client from the database and include the instance in the transformed info,
+ * allowing the full set of client properties to be convieniently accessed.
+ *
+ * If no transforms are registered, `info` supplied by the strategy will be left
+ * unmodified.
+ *
+ * Examples:
+ *
+ *     passport.transformAuthInfo(function(info, done) {
+ *       Client.findById(info.clientID, function (err, client) {
+ *         info.client = client;
+ *         done(err, info);
+ *       });
+ *     });
+ *
+ * @api public
+ */
+Authenticator.prototype.transformAuthInfo = function(fn, req, done) {
+  if (typeof fn === 'function') {
+    return this._infoTransformers.push(fn);
+  }
+  
+  // private implementation that traverses the chain of transformers,
+  // attempting to transform auth info
+  var info = fn;
+
+  // For backwards compatibility
+  if (typeof req === 'function') {
+    done = req;
+    req = undefined;
+  }
+  
+  var stack = this._infoTransformers;
+  (function pass(i, err, tinfo) {
+    // transformers use 'pass' as an error to skip processing
+    if ('pass' === err) {
+      err = undefined;
+    }
+    // an error or transformed info was obtained, done
+    if (err || tinfo) { return done(err, tinfo); }
+    
+    var layer = stack[i];
+    if (!layer) {
+      // if no transformers are registered (or they all pass), the default
+      // behavior is to use the un-transformed info as-is
+      return done(null, info);
+    }
+    
+    
+    function transformed(e, t) {
+      pass(i + 1, e, t);
+    }
+    
+    try {
+      var arity = layer.length;
+      if (arity == 1) {
+        // sync
+        var t = layer(info);
+        transformed(null, t);
+      } else if (arity == 3) {
+        layer(req, info, transformed);
+      } else {
+        layer(info, transformed);
+      }
+    } catch(e) {
+      return done(e);
+    }
+  })(0);
+};
+
+/**
+ * Return strategy with given `name`. 
+ *
+ * @param {String} name
+ * @return {Strategy}
+ * @api private
+ */
+Authenticator.prototype._strategy = function(name) {
+  return this._strategies[name];
+};
+
+
+/**
+ * Expose `Authenticator`.
+ */
+module.exports = Authenticator;
+
+
+/***/ }),
+
+/***/ "./node_modules/passport/lib/errors/authenticationerror.js":
+/*!*****************************************************************!*\
+  !*** ./node_modules/passport/lib/errors/authenticationerror.js ***!
+  \*****************************************************************/
+/***/ ((module) => {
+
+/**
+ * `AuthenticationError` error.
+ *
+ * @constructor
+ * @api private
+ */
+function AuthenticationError(message, status) {
+  Error.call(this);
+  Error.captureStackTrace(this, arguments.callee);
+  this.name = 'AuthenticationError';
+  this.message = message;
+  this.status = status || 401;
+}
+
+// Inherit from `Error`.
+AuthenticationError.prototype.__proto__ = Error.prototype;
+
+
+// Expose constructor.
+module.exports = AuthenticationError;
+
+
+/***/ }),
+
+/***/ "./node_modules/passport/lib/framework/connect.js":
+/*!********************************************************!*\
+  !*** ./node_modules/passport/lib/framework/connect.js ***!
+  \********************************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+/**
+ * Module dependencies.
+ */
+var initialize = __webpack_require__(/*! ../middleware/initialize */ "./node_modules/passport/lib/middleware/initialize.js")
+  , authenticate = __webpack_require__(/*! ../middleware/authenticate */ "./node_modules/passport/lib/middleware/authenticate.js");
+  
+/**
+ * Framework support for Connect/Express.
+ *
+ * This module provides support for using Passport with Express.  It exposes
+ * middleware that conform to the `fn(req, res, next)` signature.
+ *
+ * @return {Object}
+ * @api protected
+ */
+exports = module.exports = function() {
+  
+  return {
+    initialize: initialize,
+    authenticate: authenticate
+  };
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/passport/lib/http/request.js":
+/*!***************************************************!*\
+  !*** ./node_modules/passport/lib/http/request.js ***!
+  \***************************************************/
+/***/ ((module, exports) => {
+
+var req = exports = module.exports = {};
+
+/**
+ * Initiate a login session for `user`.
+ *
+ * Options:
+ *   - `session`  Save login state in session, defaults to _true_
+ *
+ * Examples:
+ *
+ *     req.logIn(user, { session: false });
+ *
+ *     req.logIn(user, function(err) {
+ *       if (err) { throw err; }
+ *       // session saved
+ *     });
+ *
+ * @param {User} user
+ * @param {Object} options
+ * @param {Function} done
+ * @api public
+ */
+req.login =
+req.logIn = function(user, options, done) {
+  if (typeof options == 'function') {
+    done = options;
+    options = {};
+  }
+  options = options || {};
+  
+  var property = this._userProperty || 'user';
+  var session = (options.session === undefined) ? true : options.session;
+  
+  this[property] = user;
+  if (session && this._sessionManager) {
+    if (typeof done != 'function') { throw new Error('req#login requires a callback function'); }
+    
+    var self = this;
+    this._sessionManager.logIn(this, user, options, function(err) {
+      if (err) { self[property] = null; return done(err); }
+      done();
+    });
+  } else {
+    done && done();
+  }
+};
+
+/**
+ * Terminate an existing login session.
+ *
+ * @api public
+ */
+req.logout =
+req.logOut = function(options, done) {
+  if (typeof options == 'function') {
+    done = options;
+    options = {};
+  }
+  options = options || {};
+  
+  var property = this._userProperty || 'user';
+  
+  this[property] = null;
+  if (this._sessionManager) {
+    if (typeof done != 'function') { throw new Error('req#logout requires a callback function'); }
+    
+    this._sessionManager.logOut(this, options, done);
+  } else {
+    done && done();
+  }
+};
+
+/**
+ * Test if request is authenticated.
+ *
+ * @return {Boolean}
+ * @api public
+ */
+req.isAuthenticated = function() {
+  var property = this._userProperty || 'user';
+  return (this[property]) ? true : false;
+};
+
+/**
+ * Test if request is unauthenticated.
+ *
+ * @return {Boolean}
+ * @api public
+ */
+req.isUnauthenticated = function() {
+  return !this.isAuthenticated();
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/passport/lib/index.js":
+/*!********************************************!*\
+  !*** ./node_modules/passport/lib/index.js ***!
+  \********************************************/
+/***/ ((module, exports, __webpack_require__) => {
+
+// Module dependencies.
+var Passport = __webpack_require__(/*! ./authenticator */ "./node_modules/passport/lib/authenticator.js")
+  , SessionStrategy = __webpack_require__(/*! ./strategies/session */ "./node_modules/passport/lib/strategies/session.js");
+
+
+/**
+ * Export default singleton.
+ *
+ * @api public
+ */
+exports = module.exports = new Passport();
+
+/**
+ * Expose constructors.
+ */
+exports.Passport =
+exports.Authenticator = Passport;
+exports.Strategy = __webpack_require__(/*! passport-strategy */ "./node_modules/passport-strategy/lib/index.js");
+
+/*
+ * Expose strategies.
+ */
+exports.strategies = {};
+exports.strategies.SessionStrategy = SessionStrategy;
+
+
+/***/ }),
+
+/***/ "./node_modules/passport/lib/middleware/authenticate.js":
+/*!**************************************************************!*\
+  !*** ./node_modules/passport/lib/middleware/authenticate.js ***!
+  \**************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+/**
+ * Module dependencies.
+ */
+var http = __webpack_require__(/*! http */ "http")
+  , IncomingMessageExt = __webpack_require__(/*! ../http/request */ "./node_modules/passport/lib/http/request.js")
+  , AuthenticationError = __webpack_require__(/*! ../errors/authenticationerror */ "./node_modules/passport/lib/errors/authenticationerror.js");
+
+
+/**
+ * Authenticates requests.
+ *
+ * Applies the `name`ed strategy (or strategies) to the incoming request, in
+ * order to authenticate the request.  If authentication is successful, the user
+ * will be logged in and populated at `req.user` and a session will be
+ * established by default.  If authentication fails, an unauthorized response
+ * will be sent.
+ *
+ * Options:
+ *   - `session`          Save login state in session, defaults to _true_
+ *   - `successRedirect`  After successful login, redirect to given URL
+ *   - `successMessage`   True to store success message in
+ *                        req.session.messages, or a string to use as override
+ *                        message for success.
+ *   - `successFlash`     True to flash success messages or a string to use as a flash
+ *                        message for success (overrides any from the strategy itself).
+ *   - `failureRedirect`  After failed login, redirect to given URL
+ *   - `failureMessage`   True to store failure message in
+ *                        req.session.messages, or a string to use as override
+ *                        message for failure.
+ *   - `failureFlash`     True to flash failure messages or a string to use as a flash
+ *                        message for failures (overrides any from the strategy itself).
+ *   - `assignProperty`   Assign the object provided by the verify callback to given property
+ *
+ * An optional `callback` can be supplied to allow the application to override
+ * the default manner in which authentication attempts are handled.  The
+ * callback has the following signature, where `user` will be set to the
+ * authenticated user on a successful authentication attempt, or `false`
+ * otherwise.  An optional `info` argument will be passed, containing additional
+ * details provided by the strategy's verify callback - this could be information about
+ * a successful authentication or a challenge message for a failed authentication.
+ * An optional `status` argument will be passed when authentication fails - this could
+ * be a HTTP response code for a remote authentication failure or similar.
+ *
+ *     app.get('/protected', function(req, res, next) {
+ *       passport.authenticate('local', function(err, user, info, status) {
+ *         if (err) { return next(err) }
+ *         if (!user) { return res.redirect('/signin') }
+ *         res.redirect('/account');
+ *       })(req, res, next);
+ *     });
+ *
+ * Note that if a callback is supplied, it becomes the application's
+ * responsibility to log-in the user, establish a session, and otherwise perform
+ * the desired operations.
+ *
+ * Examples:
+ *
+ *     passport.authenticate('local', { successRedirect: '/', failureRedirect: '/login' });
+ *
+ *     passport.authenticate('basic', { session: false });
+ *
+ *     passport.authenticate('twitter');
+ *
+ * @param {Strategy|String|Array} name
+ * @param {Object} options
+ * @param {Function} callback
+ * @return {Function}
+ * @api public
+ */
+module.exports = function authenticate(passport, name, options, callback) {
+  if (typeof options == 'function') {
+    callback = options;
+    options = {};
+  }
+  options = options || {};
+  
+  var multi = true;
+  
+  // Cast `name` to an array, allowing authentication to pass through a chain of
+  // strategies.  The first strategy to succeed, redirect, or error will halt
+  // the chain.  Authentication failures will proceed through each strategy in
+  // series, ultimately failing if all strategies fail.
+  //
+  // This is typically used on API endpoints to allow clients to authenticate
+  // using their preferred choice of Basic, Digest, token-based schemes, etc.
+  // It is not feasible to construct a chain of multiple strategies that involve
+  // redirection (for example both Facebook and Twitter), since the first one to
+  // redirect will halt the chain.
+  if (!Array.isArray(name)) {
+    name = [ name ];
+    multi = false;
+  }
+  
+  return function authenticate(req, res, next) {
+    req.login =
+    req.logIn = req.logIn || IncomingMessageExt.logIn;
+    req.logout =
+    req.logOut = req.logOut || IncomingMessageExt.logOut;
+    req.isAuthenticated = req.isAuthenticated || IncomingMessageExt.isAuthenticated;
+    req.isUnauthenticated = req.isUnauthenticated || IncomingMessageExt.isUnauthenticated;
+    
+    req._sessionManager = passport._sm;
+    
+    // accumulator for failures from each strategy in the chain
+    var failures = [];
+    
+    function allFailed() {
+      if (callback) {
+        if (!multi) {
+          return callback(null, false, failures[0].challenge, failures[0].status);
+        } else {
+          var challenges = failures.map(function(f) { return f.challenge; });
+          var statuses = failures.map(function(f) { return f.status; });
+          return callback(null, false, challenges, statuses);
+        }
+      }
+      
+      // Strategies are ordered by priority.  For the purpose of flashing a
+      // message, the first failure will be displayed.
+      var failure = failures[0] || {}
+        , challenge = failure.challenge || {}
+        , msg;
+    
+      if (options.failureFlash) {
+        var flash = options.failureFlash;
+        if (typeof flash == 'string') {
+          flash = { type: 'error', message: flash };
+        }
+        flash.type = flash.type || 'error';
+      
+        var type = flash.type || challenge.type || 'error';
+        msg = flash.message || challenge.message || challenge;
+        if (typeof msg == 'string') {
+          req.flash(type, msg);
+        }
+      }
+      if (options.failureMessage) {
+        msg = options.failureMessage;
+        if (typeof msg == 'boolean') {
+          msg = challenge.message || challenge;
+        }
+        if (typeof msg == 'string') {
+          req.session.messages = req.session.messages || [];
+          req.session.messages.push(msg);
+        }
+      }
+      if (options.failureRedirect) {
+        return res.redirect(options.failureRedirect);
+      }
+    
+      // When failure handling is not delegated to the application, the default
+      // is to respond with 401 Unauthorized.  Note that the WWW-Authenticate
+      // header will be set according to the strategies in use (see
+      // actions#fail).  If multiple strategies failed, each of their challenges
+      // will be included in the response.
+      var rchallenge = []
+        , rstatus, status;
+      
+      for (var j = 0, len = failures.length; j < len; j++) {
+        failure = failures[j];
+        challenge = failure.challenge;
+        status = failure.status;
+          
+        rstatus = rstatus || status;
+        if (typeof challenge == 'string') {
+          rchallenge.push(challenge);
+        }
+      }
+    
+      res.statusCode = rstatus || 401;
+      if (res.statusCode == 401 && rchallenge.length) {
+        res.setHeader('WWW-Authenticate', rchallenge);
+      }
+      if (options.failWithError) {
+        return next(new AuthenticationError(http.STATUS_CODES[res.statusCode], rstatus));
+      }
+      res.end(http.STATUS_CODES[res.statusCode]);
+    }
+    
+    (function attempt(i) {
+      var layer = name[i];
+      // If no more strategies exist in the chain, authentication has failed.
+      if (!layer) { return allFailed(); }
+    
+      // Get the strategy, which will be used as prototype from which to create
+      // a new instance.  Action functions will then be bound to the strategy
+      // within the context of the HTTP request/response pair.
+      var strategy, prototype;
+      if (typeof layer.authenticate == 'function') {
+        strategy = layer;
+      } else {
+        prototype = passport._strategy(layer);
+        if (!prototype) { return next(new Error('Unknown authentication strategy "' + layer + '"')); }
+        
+        strategy = Object.create(prototype);
+      }
+      
+      
+      // ----- BEGIN STRATEGY AUGMENTATION -----
+      // Augment the new strategy instance with action functions.  These action
+      // functions are bound via closure the the request/response pair.  The end
+      // goal of the strategy is to invoke *one* of these action methods, in
+      // order to indicate successful or failed authentication, redirect to a
+      // third-party identity provider, etc.
+      
+      /**
+       * Authenticate `user`, with optional `info`.
+       *
+       * Strategies should call this function to successfully authenticate a
+       * user.  `user` should be an object supplied by the application after it
+       * has been given an opportunity to verify credentials.  `info` is an
+       * optional argument containing additional user information.  This is
+       * useful for third-party authentication strategies to pass profile
+       * details.
+       *
+       * @param {Object} user
+       * @param {Object} info
+       * @api public
+       */
+      strategy.success = function(user, info) {
+        if (callback) {
+          return callback(null, user, info);
+        }
+      
+        info = info || {};
+        var msg;
+      
+        if (options.successFlash) {
+          var flash = options.successFlash;
+          if (typeof flash == 'string') {
+            flash = { type: 'success', message: flash };
+          }
+          flash.type = flash.type || 'success';
+        
+          var type = flash.type || info.type || 'success';
+          msg = flash.message || info.message || info;
+          if (typeof msg == 'string') {
+            req.flash(type, msg);
+          }
+        }
+        if (options.successMessage) {
+          msg = options.successMessage;
+          if (typeof msg == 'boolean') {
+            msg = info.message || info;
+          }
+          if (typeof msg == 'string') {
+            req.session.messages = req.session.messages || [];
+            req.session.messages.push(msg);
+          }
+        }
+        if (options.assignProperty) {
+          req[options.assignProperty] = user;
+          if (options.authInfo !== false) {
+            passport.transformAuthInfo(info, req, function(err, tinfo) {
+              if (err) { return next(err); }
+              req.authInfo = tinfo;
+              next();
+            });
+          } else {
+            next();
+          }
+          return;
+        }
+      
+        req.logIn(user, options, function(err) {
+          if (err) { return next(err); }
+          
+          function complete() {
+            if (options.successReturnToOrRedirect) {
+              var url = options.successReturnToOrRedirect;
+              if (req.session && req.session.returnTo) {
+                url = req.session.returnTo;
+                delete req.session.returnTo;
+              }
+              return res.redirect(url);
+            }
+            if (options.successRedirect) {
+              return res.redirect(options.successRedirect);
+            }
+            next();
+          }
+          
+          if (options.authInfo !== false) {
+            passport.transformAuthInfo(info, req, function(err, tinfo) {
+              if (err) { return next(err); }
+              req.authInfo = tinfo;
+              complete();
+            });
+          } else {
+            complete();
+          }
+        });
+      };
+      
+      /**
+       * Fail authentication, with optional `challenge` and `status`, defaulting
+       * to 401.
+       *
+       * Strategies should call this function to fail an authentication attempt.
+       *
+       * @param {String} challenge
+       * @param {Number} status
+       * @api public
+       */
+      strategy.fail = function(challenge, status) {
+        if (typeof challenge == 'number') {
+          status = challenge;
+          challenge = undefined;
+        }
+        
+        // push this failure into the accumulator and attempt authentication
+        // using the next strategy
+        failures.push({ challenge: challenge, status: status });
+        attempt(i + 1);
+      };
+      
+      /**
+       * Redirect to `url` with optional `status`, defaulting to 302.
+       *
+       * Strategies should call this function to redirect the user (via their
+       * user agent) to a third-party website for authentication.
+       *
+       * @param {String} url
+       * @param {Number} status
+       * @api public
+       */
+      strategy.redirect = function(url, status) {
+        // NOTE: Do not use `res.redirect` from Express, because it can't decide
+        //       what it wants.
+        //
+        //       Express 2.x: res.redirect(url, status)
+        //       Express 3.x: res.redirect(status, url) -OR- res.redirect(url, status)
+        //         - as of 3.14.0, deprecated warnings are issued if res.redirect(url, status)
+        //           is used
+        //       Express 4.x: res.redirect(status, url)
+        //         - all versions (as of 4.8.7) continue to accept res.redirect(url, status)
+        //           but issue deprecated versions
+        
+        res.statusCode = status || 302;
+        res.setHeader('Location', url);
+        res.setHeader('Content-Length', '0');
+        res.end();
+      };
+      
+      /**
+       * Pass without making a success or fail decision.
+       *
+       * Under most circumstances, Strategies should not need to call this
+       * function.  It exists primarily to allow previous authentication state
+       * to be restored, for example from an HTTP session.
+       *
+       * @api public
+       */
+      strategy.pass = function() {
+        next();
+      };
+      
+      /**
+       * Internal error while performing authentication.
+       *
+       * Strategies should call this function when an internal error occurs
+       * during the process of performing authentication; for example, if the
+       * user directory is not available.
+       *
+       * @param {Error} err
+       * @api public
+       */
+      strategy.error = function(err) {
+        if (callback) {
+          return callback(err);
+        }
+        
+        next(err);
+      };
+      
+      // ----- END STRATEGY AUGMENTATION -----
+    
+      strategy.authenticate(req, options);
+    })(0); // attempt
+  };
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/passport/lib/middleware/initialize.js":
+/*!************************************************************!*\
+  !*** ./node_modules/passport/lib/middleware/initialize.js ***!
+  \************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+/**
+ * Module dependencies.
+ */
+var IncomingMessageExt = __webpack_require__(/*! ../http/request */ "./node_modules/passport/lib/http/request.js");
+
+
+/**
+ * Passport initialization.
+ *
+ * Intializes Passport for incoming requests, allowing authentication strategies
+ * to be applied.
+ *
+ * If sessions are being utilized, applications must set up Passport with
+ * functions to serialize a user into and out of a session.  For example, a
+ * common pattern is to serialize just the user ID into the session (due to the
+ * fact that it is desirable to store the minimum amount of data in a session).
+ * When a subsequent request arrives for the session, the full User object can
+ * be loaded from the database by ID.
+ *
+ * Note that additional middleware is required to persist login state, so we
+ * must use the `connect.session()` middleware _before_ `passport.initialize()`.
+ *
+ * If sessions are being used, this middleware must be in use by the
+ * Connect/Express application for Passport to operate.  If the application is
+ * entirely stateless (not using sessions), this middleware is not necessary,
+ * but its use will not have any adverse impact.
+ *
+ * Examples:
+ *
+ *     app.use(connect.cookieParser());
+ *     app.use(connect.session({ secret: 'keyboard cat' }));
+ *     app.use(passport.initialize());
+ *     app.use(passport.session());
+ *
+ *     passport.serializeUser(function(user, done) {
+ *       done(null, user.id);
+ *     });
+ *
+ *     passport.deserializeUser(function(id, done) {
+ *       User.findById(id, function (err, user) {
+ *         done(err, user);
+ *       });
+ *     });
+ *
+ * @return {Function}
+ * @api public
+ */
+module.exports = function initialize(passport, options) {
+  options = options || {};
+  
+  return function initialize(req, res, next) {
+    req.login =
+    req.logIn = req.logIn || IncomingMessageExt.logIn;
+    req.logout =
+    req.logOut = req.logOut || IncomingMessageExt.logOut;
+    req.isAuthenticated = req.isAuthenticated || IncomingMessageExt.isAuthenticated;
+    req.isUnauthenticated = req.isUnauthenticated || IncomingMessageExt.isUnauthenticated;
+    
+    req._sessionManager = passport._sm;
+    
+    if (options.userProperty) {
+      req._userProperty = options.userProperty;
+    }
+    
+    var compat = (options.compat === undefined) ? true : options.compat;
+    if (compat) {
+      // `passport@0.5.1` [removed][1] all internal use of `req._passport`.
+      // From the standpoint of this package, this should have been a
+      // non-breaking change.  However, some strategies (such as `passport-azure-ad`)
+      // depend directly on `passport@0.4.x` or earlier.  `require`-ing earlier
+      // versions of `passport` has the effect of monkeypatching `http.IncomingMessage`
+      // with `logIn`, `logOut`, `isAuthenticated` and `isUnauthenticated`
+      // functions that [expect][2] the `req._passport` property to exist.
+      // Since pre-existing functions on `req` are given [preference][3], this
+      // results in [issues][4].
+      //
+      // The changes here restore the expected properties needed when earlier
+      // versions of `passport` are `require`-ed.  This compatibility mode is
+      // enabled by default, and can be disabld by simply not `use`-ing `passport.initialize()`
+      // middleware or setting `compat: false` as an option to the middleware.
+      //
+      // An alternative approach to addressing this issue would be to not
+      // preferentially use pre-existing functions on `req`, but rather always
+      // overwrite `req.logIn`, etc. with the versions of those functions shiped
+      // with `authenticate()` middleware.  This option should be reconsidered
+      // in a future major version release.
+      //
+      // [1]: https://github.com/jaredhanson/passport/pull/875
+      // [2]: https://github.com/jaredhanson/passport/blob/v0.4.1/lib/http/request.js
+      // [3]: https://github.com/jaredhanson/passport/blob/v0.5.1/lib/middleware/authenticate.js#L96
+      // [4]: https://github.com/jaredhanson/passport/issues/877
+      passport._userProperty = options.userProperty || 'user';
+      
+      req._passport = {};
+      req._passport.instance = passport;
+    }
+    
+    next();
+  };
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/passport/lib/sessionmanager.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/passport/lib/sessionmanager.js ***!
+  \*****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+var merge = __webpack_require__(/*! utils-merge */ "./node_modules/utils-merge/index.js");
+
+function SessionManager(options, serializeUser) {
+  if (typeof options == 'function') {
+    serializeUser = options;
+    options = undefined;
+  }
+  options = options || {};
+  
+  this._key = options.key || 'passport';
+  this._serializeUser = serializeUser;
+}
+
+SessionManager.prototype.logIn = function(req, user, options, cb) {
+  if (typeof options == 'function') {
+    cb = options;
+    options = {};
+  }
+  options = options || {};
+  
+  if (!req.session) { return cb(new Error('Login sessions require session support. Did you forget to use `express-session` middleware?')); }
+  
+  var self = this;
+  var prevSession = req.session;
+  
+  // regenerate the session, which is good practice to help
+  // guard against forms of session fixation
+  req.session.regenerate(function(err) {
+    if (err) {
+      return cb(err);
+    }
+    
+    self._serializeUser(user, req, function(err, obj) {
+      if (err) {
+        return cb(err);
+      }
+      if (options.keepSessionInfo) {
+        merge(req.session, prevSession);
+      }
+      if (!req.session[self._key]) {
+        req.session[self._key] = {};
+      }
+      // store user information in session, typically a user id
+      req.session[self._key].user = obj;
+      // save the session before redirection to ensure page
+      // load does not happen before session is saved
+      req.session.save(function(err) {
+        if (err) {
+          return cb(err);
+        }
+        cb();
+      });
+    });
+  });
+}
+
+SessionManager.prototype.logOut = function(req, options, cb) {
+  if (typeof options == 'function') {
+    cb = options;
+    options = {};
+  }
+  options = options || {};
+  
+  if (!req.session) { return cb(new Error('Login sessions require session support. Did you forget to use `express-session` middleware?')); }
+  
+  var self = this;
+  
+  // clear the user from the session object and save.
+  // this will ensure that re-using the old session id
+  // does not have a logged in user
+  if (req.session[this._key]) {
+    delete req.session[this._key].user;
+  }
+  var prevSession = req.session;
+  
+  req.session.save(function(err) {
+    if (err) {
+      return cb(err)
+    }
+  
+    // regenerate the session, which is good practice to help
+    // guard against forms of session fixation
+    req.session.regenerate(function(err) {
+      if (err) {
+        return cb(err);
+      }
+      if (options.keepSessionInfo) {
+        merge(req.session, prevSession);
+      }
+      cb();
+    });
+  });
+}
+
+
+module.exports = SessionManager;
+
+
+/***/ }),
+
+/***/ "./node_modules/passport/lib/strategies/session.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/passport/lib/strategies/session.js ***!
+  \*********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+// Module dependencies.
+var pause = __webpack_require__(/*! pause */ "./node_modules/pause/index.js")
+  , util = __webpack_require__(/*! util */ "util")
+  , Strategy = __webpack_require__(/*! passport-strategy */ "./node_modules/passport-strategy/lib/index.js");
+
+
+/**
+ *  Create a new `SessionStrategy` object.
+ *
+ * An instance of this strategy is automatically used when creating an
+ * `{@link Authenticator}`.  As such, it is typically unnecessary to create an
+ * instance using this constructor.
+ *
+ * @classdesc This `Strategy` authenticates HTTP requests based on the contents
+ * of session data.
+ *
+ * The login session must have been previously initiated, typically upon the
+ * user interactively logging in using a HTML form.  During session initiation,
+ * the logged-in user's information is persisted to the session so that it can
+ * be restored on subsequent requests.
+ *
+ * Note that this strategy merely restores the authentication state from the
+ * session, it does not authenticate the session itself.  Authenticating the
+ * underlying session is assumed to have been done by the middleware
+ * implementing session support.  This is typically accomplished by setting a
+ * signed cookie, and verifying the signature of that cookie on incoming
+ * requests.
+ *
+ * In {@link https://expressjs.com/ Express}-based apps, session support is
+ * commonly provided by {@link https://github.com/expressjs/session `express-session`}
+ * or {@link https://github.com/expressjs/cookie-session `cookie-session`}.
+ *
+ * @public
+ * @class
+ * @augments base.Strategy
+ * @param {Object} [options]
+ * @param {string} [options.key='passport'] - Determines what property ("key") on
+ *          the session data where login session data is located.  The login
+ *          session is stored and read from `req.session[key]`.
+ * @param {function} deserializeUser - Function which deserializes user.
+ */
+function SessionStrategy(options, deserializeUser) {
+  if (typeof options == 'function') {
+    deserializeUser = options;
+    options = undefined;
+  }
+  options = options || {};
+  
+  Strategy.call(this);
+  
+  /** The name of the strategy, set to `'session'`.
+   *
+   * @type {string}
+   * @readonly
+   */
+  this.name = 'session';
+  this._key = options.key || 'passport';
+  this._deserializeUser = deserializeUser;
+}
+
+// Inherit from `passport.Strategy`.
+util.inherits(SessionStrategy, Strategy);
+
+/**
+ * Authenticate request based on current session data.
+ *
+ * When login session data is present in the session, that data will be used to
+ * restore login state across across requests by calling the deserialize user
+ * function.
+ *
+ * If login session data is not present, the request will be passed to the next
+ * middleware, rather than failing authentication - which is the behavior of
+ * most other strategies.  This deviation allows session authentication to be
+ * performed at the application-level, rather than the individual route level,
+ * while allowing both authenticated and unauthenticated requests and rendering
+ * responses accordingly.  Routes that require authentication will need to guard
+ * that condition.
+ *
+ * This function is protected, and should not be called directly.  Instead,
+ * use `passport.authenticate()` middleware and specify the {@link SessionStrategy#name `name`}
+ * of this strategy and any options.
+ *
+ * @protected
+ * @param {http.IncomingMessage} req - The Node.js {@link https://nodejs.org/api/http.html#class-httpincomingmessage `IncomingMessage`}
+ *          object.
+ * @param {Object} [options]
+ * @param {boolean} [options.pauseStream=false] - When `true`, data events on
+ *          the request will be paused, and then resumed after the asynchronous
+ *          `deserializeUser` function has completed.  This is only necessary in
+ *          cases where later middleware in the stack are listening for events,
+ *          and ensures that those events are not missed.
+ *
+ * @example
+ * passport.authenticate('session');
+ */
+SessionStrategy.prototype.authenticate = function(req, options) {
+  if (!req.session) { return this.error(new Error('Login sessions require session support. Did you forget to use `express-session` middleware?')); }
+  options = options || {};
+
+  var self = this, 
+      su;
+  if (req.session[this._key]) {
+    su = req.session[this._key].user;
+  }
+
+  if (su || su === 0) {
+    // NOTE: Stream pausing is desirable in the case where later middleware is
+    //       listening for events emitted from request.  For discussion on the
+    //       matter, refer to: https://github.com/jaredhanson/passport/pull/106
+    
+    var paused = options.pauseStream ? pause(req) : null;
+    this._deserializeUser(su, req, function(err, user) {
+      if (err) { return self.error(err); }
+      if (!user) {
+        delete req.session[self._key].user;
+      } else {
+        var property = req._userProperty || 'user';
+        req[property] = user;
+      }
+      self.pass();
+      if (paused) {
+        paused.resume();
+      }
+    });
+  } else {
+    self.pass();
+  }
+};
+
+// Export `SessionStrategy`.
+module.exports = SessionStrategy;
+
+
+/***/ }),
+
+/***/ "./node_modules/pause/index.js":
+/*!*************************************!*\
+  !*** ./node_modules/pause/index.js ***!
+  \*************************************/
+/***/ ((module) => {
+
+
+module.exports = function(obj){
+  var onData
+    , onEnd
+    , events = [];
+
+  // buffer data
+  obj.on('data', onData = function(data, encoding){
+    events.push(['data', data, encoding]);
+  });
+
+  // buffer end
+  obj.on('end', onEnd = function(data, encoding){
+    events.push(['end', data, encoding]);
+  });
+
+  return {
+    end: function(){
+      obj.removeListener('data', onData);
+      obj.removeListener('end', onEnd);
+    },
+    resume: function(){
+      this.end();
+      for (var i = 0, len = events.length; i < len; ++i) {
+        obj.emit.apply(obj, events[i]);
+      }
+    }
+  };
+};
+
+/***/ }),
+
+/***/ "./node_modules/utils-merge/index.js":
+/*!*******************************************!*\
+  !*** ./node_modules/utils-merge/index.js ***!
+  \*******************************************/
+/***/ ((module, exports) => {
+
+/**
+ * Merge object b with object a.
+ *
+ *     var a = { foo: 'bar' }
+ *       , b = { bar: 'baz' };
+ *
+ *     merge(a, b);
+ *     // => { foo: 'bar', bar: 'baz' }
+ *
+ * @param {Object} a
+ * @param {Object} b
+ * @return {Object}
+ * @api public
+ */
+
+exports = module.exports = function(a, b){
+  if (a && b) {
+    for (var key in b) {
+      a[key] = b[key];
+    }
+  }
+  return a;
+};
+
+
+/***/ }),
+
 /***/ "@nestjs/common":
 /*!*********************************!*\
   !*** external "@nestjs/common" ***!
@@ -1225,6 +7785,28 @@ module.exports = require("@nestjs/microservices");
 
 /***/ }),
 
+/***/ "buffer":
+/*!*************************!*\
+  !*** external "buffer" ***!
+  \*************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("buffer");
+
+/***/ }),
+
+/***/ "crypto":
+/*!*************************!*\
+  !*** external "crypto" ***!
+  \*************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("crypto");
+
+/***/ }),
+
 /***/ "fs":
 /*!*********************!*\
   !*** external "fs" ***!
@@ -1233,6 +7815,28 @@ module.exports = require("@nestjs/microservices");
 
 "use strict";
 module.exports = require("fs");
+
+/***/ }),
+
+/***/ "http":
+/*!***********************!*\
+  !*** external "http" ***!
+  \***********************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("http");
+
+/***/ }),
+
+/***/ "ms":
+/*!*********************!*\
+  !*** external "ms" ***!
+  \*********************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("ms");
 
 /***/ }),
 
@@ -1376,6 +7980,61 @@ module.exports = require("path");
 
 "use strict";
 module.exports = require("rxjs");
+
+/***/ }),
+
+/***/ "safe-buffer":
+/*!******************************!*\
+  !*** external "safe-buffer" ***!
+  \******************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("safe-buffer");
+
+/***/ }),
+
+/***/ "semver":
+/*!*************************!*\
+  !*** external "semver" ***!
+  \*************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("semver");
+
+/***/ }),
+
+/***/ "stream":
+/*!*************************!*\
+  !*** external "stream" ***!
+  \*************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("stream");
+
+/***/ }),
+
+/***/ "url":
+/*!**********************!*\
+  !*** external "url" ***!
+  \**********************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("url");
+
+/***/ }),
+
+/***/ "util":
+/*!***********************!*\
+  !*** external "util" ***!
+  \***********************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("util");
 
 /***/ })
 

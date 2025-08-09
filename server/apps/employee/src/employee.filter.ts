@@ -6,7 +6,6 @@ import { RpcException } from '@nestjs/microservices';
 export class EmployeeRpcExceptionFilter implements RpcExceptionFilter<any> {
   catch(exception: any, host: ArgumentsHost): Observable<any> {
     // Handle NestJS HTTP Exceptions
-    console.log(exception, host, '<<<<');
     if (exception.getStatus && typeof exception.getStatus === 'function') {
       return throwError(
         () =>

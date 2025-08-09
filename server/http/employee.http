@@ -1,58 +1,95 @@
 ### Variables
 @baseUrl = http://localhost:3000
-@employeeId = 1
+@employeeToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMyLCJlbWFpbCI6ImpvaG4uZG9lQGNvbXBhbnkuY29tIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZSI6IkVNUExPWUVFIiwiaWF0IjoxNzU0NzI1MzQ0LCJleHAiOjE3NTQ3Mjg5NDR9.Ji13kIzx5g8Za8N1tg0STjmo8OY4itoUwsncVlS6Xvg
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMxLCJlbWFpbCI6ImFkbWluQGNvbXBhbnkuY29tIiwibmFtZSI6IkFkbWluIEhSRCIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1NDcyNTMzMSwiZXhwIjoxNzU0NzI4OTMxfQ.iaUHVHwDqqlqSBerUGQ9XilO9S9TLV94ryNsDiw-yBE
 
-### Get All Employees
-GET {{baseUrl}}/employees
-Content-Type: application/json
+### ========================================
+### STEP 1: LOGIN TO GET TOKENS
+### ========================================
 
-### Create New Employee
-POST {{baseUrl}}/employees
+### Login as Employee
+POST {{baseUrl}}/auth/login
 Content-Type: application/json
 
 {
-  "name": "John Doe",
   "email": "john.doe@company.com",
+  "password": "password123"
+}
+
+### Login as Admin
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@company.com",
+  "password": "admin123"
+}
+
+### ========================================
+### STEP 2: COPY TOKENS TO VARIABLES ABOVE
+### ========================================
+
+### ========================================
+### PUBLIC ENDPOINTS (No Authentication Required)
+### ========================================
+
+### Validate Employee Credentials
+POST {{baseUrl}}/employees/validate
+Content-Type: application/json
+
+{
+  "email": "john.doe@company.com",
+  "password": "password123"
+}
+
+### ========================================
+### ADMIN ONLY ENDPOINTS
+### ========================================
+
+### Get All Employees (Admin Only) ✅
+GET {{baseUrl}}/employees
+Authorization: Bearer {{adminToken}}
+
+### Create New Employee (Admin Only) ✅
+POST {{baseUrl}}/employees
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Jane Smith",
+  "email": "jane.smith@company.com",
   "password": "password123",
-  "position": "Frontend Developer",
-  "phoneNumber": "081234567890",
+  "position": "Backend Developer",
+  "phoneNumber": "081234567892",
   "role": "EMPLOYEE"
 }
 
-### Create Admin Employee
-POST {{baseUrl}}/employees
-Content-Type: application/json
+### Get Employee by ID (Admin Only) ✅
+GET {{baseUrl}}/employees/1
+Authorization: Bearer {{adminToken}}
 
-{
-  "name": "Admin HRD",
-  "email": "admin@company.com", 
-  "password": "admin123",
-  "position": "HRD Manager",
-  "phoneNumber": "081234567891",
-  "role": "ADMIN"
-}
-
-### Get Employee by ID
-GET {{baseUrl}}/employees/{{employeeId}}
-Content-Type: application/json
-
-### Get Employee by Email
+### Get Employee by Email (Admin Only) ✅
 GET {{baseUrl}}/employees/email/john.doe@company.com
-Content-Type: application/json
+Authorization: Bearer {{adminToken}}
 
-### Update Employee Profile
-PATCH {{baseUrl}}/employees/{{employeeId}}/profile
+### ========================================
+### FLEXIBLE ENDPOINTS (Own Data or Admin Any Data)
+### ========================================
+
+### Employee Update Own Profile (ID 1 = Employee's ID) ✅
+PATCH {{baseUrl}}/employees/1/profile
+Authorization: Bearer {{employeeToken}}
 Content-Type: application/json
 
 {
-  "name": "John Doe Updated",
+  "name": "John Doe Updated by Self",
   "position": "Senior Frontend Developer",
-  "phoneNumber": "081234567999",
-  "photoUrl": "https://example.com/photo.jpg"
+  "phoneNumber": "081234567999"
 }
 
-### Update Employee Password
-PATCH {{baseUrl}}/employees/{{employeeId}}/password
+### Employee Change Own Password (ID 1 = Employee's ID) ✅
+PATCH {{baseUrl}}/employees/1/password
+Authorization: Bearer {{employeeToken}}
 Content-Type: application/json
 
 {
@@ -60,52 +97,150 @@ Content-Type: application/json
   "newPassword": "newpassword456"
 }
 
-### Test Login Validation - Valid Credentials
-POST {{baseUrl}}/employees/validate
+### Admin Update Any Employee Profile ✅
+PATCH {{baseUrl}}/employees/1/profile
+Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "email": "john.doe@company.com",
-  "password": "password123"
+  "name": "John Doe Updated by Admin",
+  "position": "Lead Developer",
+  "phoneNumber": "081234567888"
 }
 
-### Test Login Validation - Wrong Password
-POST {{baseUrl}}/employees/validate
+### Admin Reset Any Employee Password ✅
+PATCH {{baseUrl}}/employees/1/password
+Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "email": "john.doe@company.com",
-  "password": "wrongpassword"
+  "currentPassword": "oldpassword", 
+  "newPassword": "adminreset123"
 }
 
-### Test Login Validation - Non-existent Email
-POST {{baseUrl}}/employees/validate
+### ========================================
+### UNAUTHORIZED TESTS (Should Return 401)
+### ========================================
+
+### No Token - Should Return 401
+GET {{baseUrl}}/employees
+Content-Type: application/json
+
+### No Token - Should Return 401
+GET {{baseUrl}}/employees/1
+Content-Type: application/json
+
+### No Token - Should Return 401
+PATCH {{baseUrl}}/employees/1/profile
 Content-Type: application/json
 
 {
-  "email": "notexist@company.com",
-  "password": "password123"
+  "name": "Unauthorized Update"
 }
 
-### Test Error Cases
+### ========================================
+### FORBIDDEN TESTS (Should Return 403)
+### ========================================
 
-### Get Non-existent Employee
-GET {{baseUrl}}/employees/999
-Content-Type: application/json
+### Employee trying Admin endpoint - Should Return 403
+GET {{baseUrl}}/employees
+Authorization: Bearer {{employeeToken}}
 
-### Update Non-existent Employee
-PATCH {{baseUrl}}/employees/999/profile
-Content-Type: application/json
-
-{
-  "name": "Test"
-}
-
-### Update Password with Wrong Current Password
-PATCH {{baseUrl}}/employees/{{employeeId}}/password
+### Employee trying to create employee - Should Return 403
+POST {{baseUrl}}/employees
+Authorization: Bearer {{employeeToken}}
 Content-Type: application/json
 
 {
-  "currentPassword": "wrongpassword",
-  "newPassword": "newpassword123"
+  "name": "Unauthorized Create",
+  "email": "hack@company.com",
+  "password": "hack123"
 }
+
+### Employee trying to view other employee by ID - Should Return 403
+GET {{baseUrl}}/employees/2
+Authorization: Bearer {{employeeToken}}
+
+### Employee trying to search by email - Should Return 403
+GET {{baseUrl}}/employees/email/other@company.com
+Authorization: Bearer {{employeeToken}}
+
+### Employee trying to update other's profile - Should Return 403
+PATCH {{baseUrl}}/employees/2/profile
+Authorization: Bearer {{employeeToken}}
+Content-Type: application/json
+
+{
+  "name": "Hacking Other Profile"
+}
+
+### Employee trying to change other's password - Should Return 403
+PATCH {{baseUrl}}/employees/2/password
+Authorization: Bearer {{employeeToken}}
+Content-Type: application/json
+
+{
+  "currentPassword": "guess",
+  "newPassword": "hacked123"
+}
+
+### ========================================
+### EDGE CASES
+### ========================================
+
+### Invalid Token - Should Return 401
+GET {{baseUrl}}/employees/1
+Authorization: Bearer invalid_token_here
+
+### Expired Token Test (if you have expired token)
+GET {{baseUrl}}/employees/1
+Authorization: Bearer expired_token_here
+
+### Malformed Token - Should Return 401
+GET {{baseUrl}}/employees/1
+Authorization: Bearer malformed.token.here
+
+### ========================================
+### SUCCESS FLOW TEST
+### ========================================
+
+### 1. Create employee as admin
+POST {{baseUrl}}/employees
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "name": "Test User",
+  "email": "test.user@company.com",
+  "password": "test123",
+  "position": "QA Tester",
+  "phoneNumber": "081234567893",
+  "role": "EMPLOYEE"
+}
+
+### 2. Login as new employee
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "test.user@company.com",
+  "password": "test123"
+}
+
+### 3. New employee update own profile (use new token)
+PATCH {{baseUrl}}/employees/NEW_USER_ID/profile
+Authorization: Bearer NEW_USER_TOKEN
+Content-Type: application/json
+
+{
+  "name": "Test User Updated",
+  "position": "Senior QA Tester"
+}
+
+### ========================================
+### CLEANUP (Optional)
+### ========================================
+
+### Admin can delete/deactivate employees if you implement delete endpoint
+### DELETE {{baseUrl}}/employees/NEW_USER_ID
+### Authorization: Bearer {{adminToken}}

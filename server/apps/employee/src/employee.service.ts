@@ -194,7 +194,6 @@ export class EmployeeService {
       password,
       employee.password,
     );
-
     if (!isPasswordValid) {
       return null;
     }

@@ -1,0 +1,35 @@
+### Variables
+@baseUrl = http://localhost:3000
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMxLCJlbWFpbCI6ImFkbWluQGNvbXBhbnkuY29tIiwibmFtZSI6IkFkbWluIEhSRCIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1NDcyNTExNiwiZXhwIjoxNzU0NzI4NzE2fQ.tRMMJECMsID-f-V4ZrzI2Iv1LToZqcmS3yEh6C-nMqk
+
+### Login with Employee Credentials
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "john.doe@company.com",
+  "password": "password123"
+}
+
+### Login with Admin Credentials
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@company.com",
+  "password": "admin123"
+}
+
+### Test Protected Endpoint - Get Profile (Need valid token)
+GET {{baseUrl}}/employees/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Test Admin Only Endpoint - Get All Employees
+GET {{baseUrl}}/employees
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Test Unauthorized Access (No token)
+GET {{baseUrl}}/employees/profile
+Content-Type: application/json
