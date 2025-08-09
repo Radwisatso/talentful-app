@@ -21,78 +21,282 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+# Dexa Attendance Management System
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+A microservices-based attendance management system built with NestJS, featuring JWT authentication, role-based authorization, and PostgreSQL database integration.
 
-## Project setup
+## 🏗️ Architecture
 
-```bash
-$ npm install
+```
+┌─────────────────────────────────┐    ┌──────────────────┐
+│     API Gateway (Port 3000)    │    │   PostgreSQL     │
+│  - Authentication (JWT)        │────│    Database      │
+│  - Authorization (RBAC)        │    │                  │
+│  - Route Management             │    └──────────────────┘
+└─────────────────────────────────┘
+              │
+    ┌─────────┴─────────┐
+    │                   │
+┌───▼────────┐    ┌─────▼─────────┐
+│  Employee  │    │  Attendance   │
+│Microservice│    │ Microservice  │
+│(Port 3001) │    │ (Port 3002)   │
+└────────────┘    └───────────────┘
 ```
 
-## Compile and run the project
+## 📁 Project Structure
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```
+server/
+├── apps/
+│   ├── attendance-api-gateway/     # Main API Gateway
+│   │   ├── src/
+│   │   │   ├── auth/              # Authentication & Authorization
+│   │   │   ├── employee/          # Employee Gateway Routes
+│   │   │   ├── attendance/        # Attendance Gateway Routes
+│   │   │   └── main.ts
+│   │   └── tsconfig.app.json
+│   ├── employee/                   # Employee Microservice
+│   │   ├── src/
+│   │   │   ├── employee.controller.ts
+│   │   │   ├── employee.service.ts
+│   │   │   ├── password.service.ts
+│   │   │   ├── employee.filter.ts
+│   │   │   └── main.ts
+│   │   └── tsconfig.app.json
+│   └── attendance/                 # Attendance Microservice
+│       ├── src/
+│       │   ├── attendance.controller.ts
+│       │   ├── attendance.service.ts
+│       │   └── main.ts
+│       └── tsconfig.app.json
+├── libs/
+│   ├── contracts/                  # Shared DTOs & Interfaces
+│   └── prisma/                    # Database Module
+├── prisma/
+│   ├── schema.prisma              # Database Schema
+│   └── migrations/                # Database Migrations
+└── http/                          # HTTP Test Files
+    ├── auth.http
+    ├── employee.http
+    └── attendance.http
 ```
 
-## Run tests
+## 🚀 Getting Started
+
+### Prerequisites
+
+- Node.js (v18+)
+- PostgreSQL
+- npm or yarn
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone <repository-url>
+   cd dexa/server
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Environment setup**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+4. **Configure environment variables**
+
+   ```env
+   # Database
+   DATABASE_URL="postgresql://username:password@localhost:5432/dexa_attendance"
+
+   # JWT Authentication
+   JWT_SECRET="your-super-secret-jwt-key-here"
+   JWT_EXPIRES_IN="1h"
+   ```
+
+5. **Database setup**
+   ```bash
+   npx prisma migrate dev --name init
+   npx prisma generate
+   npx prisma db seed
+   ```
+
+### Running the Application
+
+#### Development Mode
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+# Start all services
+npm run start:dev:employee   # Employee Microservice (Port 3001)
+npm run start:dev:attendance # Attendance Microservice (Port 3002)
+npm run start:dev:gateway    # API Gateway (Port 3000)
 ```
 
-## Deployment
+## 🔐 Authentication & Authorization
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### JWT Authentication
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+The system uses JWT-based authentication with role-based access control.
+
+**Roles:**
+
+- `EMPLOYEE` - Can manage own data only
+- `ADMIN` - Can manage all system data
+
+### Getting Started with Auth
+
+1. **Login**
+
+   ```http
+   POST http://localhost:3000/auth/login
+   Content-Type: application/json
+
+   {
+     "email": "admin@company.com",
+     "password": "admin123"
+   }
+   ```
+
+2. **Use JWT Token**
+   ```http
+   GET http://localhost:3000/employees/profile
+   Authorization: Bearer YOUR_JWT_TOKEN
+   ```
+
+## 📊 API Endpoints
+
+### Authentication
+
+| Method | Endpoint      | Access | Description |
+| ------ | ------------- | ------ | ----------- |
+| POST   | `/auth/login` | Public | User login  |
+
+### Employee Management
+
+| Method | Endpoint                  | Access      | Description           |
+| ------ | ------------------------- | ----------- | --------------------- |
+| GET    | `/employees`              | Admin       | Get all employees     |
+| POST   | `/employees`              | Admin       | Create employee       |
+| GET    | `/employees/:id`          | Admin       | Get employee by ID    |
+| GET    | `/employees/email/:email` | Admin       | Get employee by email |
+| PATCH  | `/employees/:id/profile`  | Owner/Admin | Update profile        |
+| PATCH  | `/employees/:id/password` | Owner/Admin | Change password       |
+| POST   | `/employees/validate`     | Public      | Validate credentials  |
+
+### Attendance Management
+
+| Method | Endpoint                | Access        | Description                  |
+| ------ | ----------------------- | ------------- | ---------------------------- |
+| POST   | `/attendances/checkin`  | Authenticated | Check in (self/admin-any)    |
+| POST   | `/attendances/checkout` | Authenticated | Check out (self/admin-any)   |
+| GET    | `/attendances/summary`  | Authenticated | Get summary (self/admin-any) |
+| GET    | `/attendances/records`  | Authenticated | Get records (self/admin-any) |
+| GET    | `/attendances/all`      | Admin         | Get all attendance records   |
+
+## 🧪 Testing
+
+### HTTP Test Files
+
+Use the provided HTTP test files for API testing:
+
+- `http/auth.http` - Authentication tests
+- `http/employee.http` - Employee management tests
+- `http/attendance.http` - Attendance management tests
+
+### Test Flow
+
+1. **Login** to get JWT token
+2. **Copy token** to test file variables
+3. **Run tests** for different scenarios:
+   - Success cases
+   - Unauthorized access (401)
+   - Forbidden access (403)
+   - Edge cases
+
+### Unit & E2E Tests
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Unit tests
+npm run test
+
+# E2E tests
+npm run test:e2e
+
+# Test coverage
+npm run test:cov
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## 🗄️ Database Schema
 
-## Resources
+### Employee Table
 
-Check out a few resources that may come in handy when working with NestJS:
+- `id` - Primary key
+- `name` - Full name
+- `email` - Email address (unique)
+- `password` - Hashed password
+- `role` - EMPLOYEE | ADMIN
+- `position` - Job position
+- `phoneNumber` - Contact number
+- `photoUrl` - Profile photo URL
+- `createdAt` - Creation timestamp
+- `updatedAt` - Update timestamp
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Attendance Table
 
-## Support
+- `id` - Primary key
+- `employeeId` - Foreign key to Employee
+- `date` - Attendance date
+- `time` - Check-in/out time
+- `status` - CHECKIN | CHECKOUT
+- `createdAt` - Creation timestamp
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## 📦 Technologies Used
 
-## Stay in touch
+### Core
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- **NestJS** - Progressive Node.js framework
+- **TypeScript** - Type-safe JavaScript
+- **Prisma** - Modern database toolkit
+- **PostgreSQL** - Relational database
 
-## License
+### Authentication & Security
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- **JWT** - JSON Web Tokens
+- **bcrypt** - Password hashing
+- **Passport** - Authentication middleware
+
+### Communication
+
+- **TCP** - Inter-microservice communication
+- **RxJS** - Reactive programming
+
+### Development
+
+- **ESLint** - Code linting
+- **Prettier** - Code formatting
+
+## 🔧 Configuration
+
+### Environment Variables
+
+| Variable         | Description                  | Default |
+| ---------------- | ---------------------------- | ------- |
+| `DATABASE_URL`   | PostgreSQL connection string | -       |
+| `JWT_SECRET`     | JWT signing secret           | -       |
+| `JWT_EXPIRES_IN` | JWT expiration time          | `1h`    |
+
+### Ports
+
+| Service                 | Port | Description         |
+| ----------------------- | ---- | ------------------- |
+| API Gateway             | 3000 | Main entry point    |
+| Employee Microservice   | 3001 | Employee management |
+| Attendance Microservice | 3002 | Attendance tracking |
