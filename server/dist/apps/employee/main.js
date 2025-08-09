@@ -51,6 +51,9 @@ let EmployeeController = class EmployeeController {
     updatePassword(payload) {
         return this.employeeService.updatePassword(payload.id, payload.dto);
     }
+    validateEmployee(payload) {
+        return this.employeeService.validateEmployee(payload.email, payload.password);
+    }
 };
 exports.EmployeeController = EmployeeController;
 __decorate([
@@ -94,10 +97,82 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], EmployeeController.prototype, "updatePassword", null);
+__decorate([
+    (0, microservices_1.MessagePattern)('employee.validate'),
+    __param(0, (0, microservices_1.Payload)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], EmployeeController.prototype, "validateEmployee", null);
 exports.EmployeeController = EmployeeController = __decorate([
     (0, common_1.Controller)(),
     __metadata("design:paramtypes", [typeof (_a = typeof employee_service_1.EmployeeService !== "undefined" && employee_service_1.EmployeeService) === "function" ? _a : Object])
 ], EmployeeController);
+
+
+/***/ }),
+
+/***/ "./apps/employee/src/employee.filter.ts":
+/*!**********************************************!*\
+  !*** ./apps/employee/src/employee.filter.ts ***!
+  \**********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.EmployeeRpcExceptionFilter = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const rxjs_1 = __webpack_require__(/*! rxjs */ "rxjs");
+const microservices_1 = __webpack_require__(/*! @nestjs/microservices */ "@nestjs/microservices");
+let EmployeeRpcExceptionFilter = class EmployeeRpcExceptionFilter {
+    catch(exception, host) {
+        console.log(exception, host, '<<<<');
+        if (exception.getStatus && typeof exception.getStatus === 'function') {
+            return (0, rxjs_1.throwError)(() => new microservices_1.RpcException({
+                statusCode: exception.getStatus(),
+                message: exception.message,
+                error: exception.name,
+            }));
+        }
+        if (exception.code) {
+            let statusCode = 400;
+            let message = 'Database error';
+            switch (exception.code) {
+                case 'P2002':
+                    statusCode = 409;
+                    message = 'Email address is already registered';
+                    break;
+                case 'P2025':
+                    statusCode = 404;
+                    message = 'Record not found';
+                    break;
+                default:
+                    message = 'Database operation failed';
+            }
+            return (0, rxjs_1.throwError)(() => new microservices_1.RpcException({
+                statusCode,
+                message,
+                error: 'DatabaseError',
+            }));
+        }
+        return (0, rxjs_1.throwError)(() => new microservices_1.RpcException({
+            statusCode: 500,
+            message: exception.message || 'Internal server error',
+            error: 'InternalError',
+        }));
+    }
+};
+exports.EmployeeRpcExceptionFilter = EmployeeRpcExceptionFilter;
+exports.EmployeeRpcExceptionFilter = EmployeeRpcExceptionFilter = __decorate([
+    (0, common_1.Catch)()
+], EmployeeRpcExceptionFilter);
 
 
 /***/ }),
@@ -121,6 +196,7 @@ exports.EmployeeModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const employee_controller_1 = __webpack_require__(/*! ./employee.controller */ "./apps/employee/src/employee.controller.ts");
 const employee_service_1 = __webpack_require__(/*! ./employee.service */ "./apps/employee/src/employee.service.ts");
+const password_service_1 = __webpack_require__(/*! ./password.service */ "./apps/employee/src/password.service.ts");
 const libs_1 = __webpack_require__(/*! ../../../libs */ "./libs/index.ts");
 let EmployeeModule = class EmployeeModule {
 };
@@ -129,7 +205,7 @@ exports.EmployeeModule = EmployeeModule = __decorate([
     (0, common_1.Module)({
         imports: [libs_1.PrismaModule],
         controllers: [employee_controller_1.EmployeeController],
-        providers: [employee_service_1.EmployeeService],
+        providers: [employee_service_1.EmployeeService, password_service_1.PasswordService],
     })
 ], EmployeeModule);
 
@@ -153,15 +229,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EmployeeService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const libs_1 = __webpack_require__(/*! ../../../libs */ "./libs/index.ts");
+const password_service_1 = __webpack_require__(/*! ./password.service */ "./apps/employee/src/password.service.ts");
 let EmployeeService = class EmployeeService {
     prisma;
-    constructor(prisma) {
+    passwordService;
+    constructor(prisma, passwordService) {
         this.prisma = prisma;
+        this.passwordService = passwordService;
     }
     async findAll() {
         return this.prisma.employee.findMany({
@@ -180,8 +259,13 @@ let EmployeeService = class EmployeeService {
         });
     }
     async create(dto) {
-        return this.prisma.employee.create({
-            data: dto,
+        const hashedPassword = await this.passwordService.hashPassword(dto.password);
+        const employee = await this.prisma.employee.create({
+            data: {
+                ...dto,
+                password: hashedPassword,
+                role: dto.role || 'EMPLOYEE',
+            },
             select: {
                 id: true,
                 name: true,
@@ -194,6 +278,7 @@ let EmployeeService = class EmployeeService {
                 updatedAt: true,
             },
         });
+        return employee;
     }
     async findById(id) {
         const employee = await this.prisma.employee.findUnique({
@@ -230,6 +315,21 @@ let EmployeeService = class EmployeeService {
             },
         });
     }
+    async findByEmailWithPassword(email) {
+        return this.prisma.employee.findUnique({
+            where: { email },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                password: true,
+                photoUrl: true,
+                position: true,
+                phoneNumber: true,
+                role: true,
+            },
+        });
+    }
     async updateProfile(id, dto) {
         try {
             return await this.prisma.employee.update({
@@ -253,12 +353,21 @@ let EmployeeService = class EmployeeService {
         }
     }
     async updatePassword(id, dto) {
-        const employee = await this.findById(id);
-        if (!dto.newPassword)
-            throw new common_1.BadRequestException('New password required');
+        const employee = await this.prisma.employee.findUnique({
+            where: { id },
+            select: { id: true, password: true },
+        });
+        if (!employee) {
+            throw new common_1.NotFoundException('Employee not found');
+        }
+        const isCurrentPasswordValid = await this.passwordService.comparePassword(dto.currentPassword, employee.password);
+        if (!isCurrentPasswordValid) {
+            throw new common_1.BadRequestException('Current password is incorrect');
+        }
+        const hashedNewPassword = await this.passwordService.hashPassword(dto.newPassword);
         return this.prisma.employee.update({
-            where: { id: employee.id },
-            data: { password: dto.newPassword },
+            where: { id },
+            data: { password: hashedNewPassword },
             select: {
                 id: true,
                 name: true,
@@ -271,12 +380,92 @@ let EmployeeService = class EmployeeService {
             },
         });
     }
+    async validateEmployee(email, password) {
+        const employee = await this.findByEmailWithPassword(email);
+        if (!employee) {
+            return null;
+        }
+        const isPasswordValid = await this.passwordService.comparePassword(password, employee.password);
+        if (!isPasswordValid) {
+            return null;
+        }
+        const { password: _, ...result } = employee;
+        return result;
+    }
 };
 exports.EmployeeService = EmployeeService;
 exports.EmployeeService = EmployeeService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof libs_1.PrismaService !== "undefined" && libs_1.PrismaService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof libs_1.PrismaService !== "undefined" && libs_1.PrismaService) === "function" ? _a : Object, typeof (_b = typeof password_service_1.PasswordService !== "undefined" && password_service_1.PasswordService) === "function" ? _b : Object])
 ], EmployeeService);
+
+
+/***/ }),
+
+/***/ "./apps/employee/src/password.service.ts":
+/*!***********************************************!*\
+  !*** ./apps/employee/src/password.service.ts ***!
+  \***********************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PasswordService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const bcrypt = __importStar(__webpack_require__(/*! bcrypt */ "bcrypt"));
+let PasswordService = class PasswordService {
+    saltRounds = 12;
+    async hashPassword(password) {
+        return bcrypt.hash(password, this.saltRounds);
+    }
+    async comparePassword(password, hashedPassword) {
+        return bcrypt.compare(password, hashedPassword);
+    }
+};
+exports.PasswordService = PasswordService;
+exports.PasswordService = PasswordService = __decorate([
+    (0, common_1.Injectable)()
+], PasswordService);
 
 
 /***/ }),
@@ -946,6 +1135,17 @@ module.exports = require("@nestjs/microservices");
 
 /***/ }),
 
+/***/ "bcrypt":
+/*!*************************!*\
+  !*** external "bcrypt" ***!
+  \*************************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("bcrypt");
+
+/***/ }),
+
 /***/ "fs":
 /*!*********************!*\
   !*** external "fs" ***!
@@ -1087,6 +1287,17 @@ module.exports = require("node:util");
 "use strict";
 module.exports = require("path");
 
+/***/ }),
+
+/***/ "rxjs":
+/*!***********************!*\
+  !*** external "rxjs" ***!
+  \***********************/
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("rxjs");
+
 /***/ })
 
 /******/ 	});
@@ -1129,6 +1340,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
 const microservices_1 = __webpack_require__(/*! @nestjs/microservices */ "@nestjs/microservices");
 const employee_module_1 = __webpack_require__(/*! ./employee.module */ "./apps/employee/src/employee.module.ts");
+const employee_filter_1 = __webpack_require__(/*! ./employee.filter */ "./apps/employee/src/employee.filter.ts");
 async function bootstrap() {
     const app = await core_1.NestFactory.createMicroservice(employee_module_1.EmployeeModule, {
         transport: microservices_1.Transport.TCP,
@@ -1136,6 +1348,7 @@ async function bootstrap() {
             port: 3001,
         },
     });
+    app.useGlobalFilters(new employee_filter_1.EmployeeRpcExceptionFilter());
     await app.listen();
 }
 bootstrap();

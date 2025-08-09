@@ -40,4 +40,12 @@ export class EmployeeController {
   updatePassword(@Payload() payload: { id: number; dto: UpdatePasswordDto }) {
     return this.employeeService.updatePassword(payload.id, payload.dto);
   }
+
+  @MessagePattern('employee.validate')
+  validateEmployee(@Payload() payload: { email: string; password: string }) {
+    return this.employeeService.validateEmployee(
+      payload.email,
+      payload.password,
+    );
+  }
 }

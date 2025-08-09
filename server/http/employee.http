@@ -60,6 +60,33 @@ Content-Type: application/json
   "newPassword": "newpassword456"
 }
 
+### Test Login Validation - Valid Credentials
+POST {{baseUrl}}/employees/validate
+Content-Type: application/json
+
+{
+  "email": "john.doe@company.com",
+  "password": "password123"
+}
+
+### Test Login Validation - Wrong Password
+POST {{baseUrl}}/employees/validate
+Content-Type: application/json
+
+{
+  "email": "john.doe@company.com",
+  "password": "wrongpassword"
+}
+
+### Test Login Validation - Non-existent Email
+POST {{baseUrl}}/employees/validate
+Content-Type: application/json
+
+{
+  "email": "notexist@company.com",
+  "password": "password123"
+}
+
 ### Test Error Cases
 
 ### Get Non-existent Employee
@@ -72,4 +99,13 @@ Content-Type: application/json
 
 {
   "name": "Test"
+}
+
+### Update Password with Wrong Current Password
+PATCH {{baseUrl}}/employees/{{employeeId}}/password
+Content-Type: application/json
+
+{
+  "currentPassword": "wrongpassword",
+  "newPassword": "newpassword123"
 }

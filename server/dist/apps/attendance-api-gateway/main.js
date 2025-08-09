@@ -484,23 +484,70 @@ let EmployeeService = class EmployeeService {
     constructor(client) {
         this.client = client;
     }
-    findAll() {
-        return (0, rxjs_1.firstValueFrom)(this.client.send('employee.findAll', {}));
+    async findAll() {
+        try {
+            return await (0, rxjs_1.firstValueFrom)(this.client.send('employee.findAll', {}));
+        }
+        catch (error) {
+            this.handleMicroserviceError(error);
+        }
     }
-    create(dto) {
-        return (0, rxjs_1.firstValueFrom)(this.client.send('employee.create', dto));
+    async create(dto) {
+        try {
+            return await (0, rxjs_1.firstValueFrom)(this.client.send('employee.create', dto));
+        }
+        catch (error) {
+            this.handleMicroserviceError(error);
+        }
     }
-    findById(id) {
-        return (0, rxjs_1.firstValueFrom)(this.client.send('employee.findById', id));
+    async findById(id) {
+        try {
+            return await (0, rxjs_1.firstValueFrom)(this.client.send('employee.findById', id));
+        }
+        catch (error) {
+            this.handleMicroserviceError(error);
+        }
     }
-    findByEmail(email) {
-        return (0, rxjs_1.firstValueFrom)(this.client.send('employee.findByEmail', email));
+    async findByEmail(email) {
+        try {
+            return await (0, rxjs_1.firstValueFrom)(this.client.send('employee.findByEmail', email));
+        }
+        catch (error) {
+            this.handleMicroserviceError(error);
+        }
     }
-    updateProfile(id, dto) {
-        return (0, rxjs_1.firstValueFrom)(this.client.send('employee.updateProfile', { id, dto }));
+    async updateProfile(id, dto) {
+        try {
+            return await (0, rxjs_1.firstValueFrom)(this.client.send('employee.updateProfile', { id, dto }));
+        }
+        catch (error) {
+            this.handleMicroserviceError(error);
+        }
     }
-    updatePassword(id, dto) {
-        return (0, rxjs_1.firstValueFrom)(this.client.send('employee.updatePassword', { id, dto }));
+    async updatePassword(id, dto) {
+        try {
+            return await (0, rxjs_1.firstValueFrom)(this.client.send('employee.updatePassword', { id, dto }));
+        }
+        catch (error) {
+            this.handleMicroserviceError(error);
+        }
+    }
+    async validateEmployee(email, password) {
+        try {
+            return await (0, rxjs_1.firstValueFrom)(this.client.send('employee.validate', { email, password }));
+        }
+        catch (error) {
+            this.handleMicroserviceError(error);
+        }
+    }
+    handleMicroserviceError(error) {
+        if (error.error && error.error.statusCode) {
+            throw new common_1.HttpException(error.error.message, error.error.statusCode);
+        }
+        if (error.statusCode) {
+            throw new common_1.HttpException(error.message, error.statusCode);
+        }
+        throw new common_1.HttpException(error.message || 'Internal server error', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
     }
 };
 exports.EmployeeService = EmployeeService;

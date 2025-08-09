@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
-import { Transport, MicroserviceOptions } from '@nestjs/microservices';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { EmployeeModule } from './employee.module';
+import { EmployeeRpcExceptionFilter } from './employee.filter';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
@@ -12,6 +13,10 @@ async function bootstrap() {
       },
     },
   );
+
+  // Apply global exception filter
+  app.useGlobalFilters(new EmployeeRpcExceptionFilter());
+
   await app.listen();
 }
 bootstrap();

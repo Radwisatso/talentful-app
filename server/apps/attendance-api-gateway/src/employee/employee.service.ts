@@ -1,9 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { CreateEmployeeDto } from '../../../../libs/contracts/src/employee/dto/create-employee.dto';
-import { UpdateEmployeeDto } from '../../../../libs/contracts/src/employee/dto/update-employee.dto';
-import { UpdatePasswordDto } from '../../../../libs/contracts/src/employee/dto/update-password.dto';
+import {
+  CreateEmployeeDto,
+  UpdateEmployeeDto,
+  UpdatePasswordDto,
+} from '../../../../libs';
 
 @Injectable()
 export class EmployeeService {
@@ -11,31 +13,85 @@ export class EmployeeService {
     @Inject('EMPLOYEE_CLIENT') private readonly client: ClientProxy,
   ) {}
 
-  findAll() {
-    return firstValueFrom(this.client.send('employee.findAll', {}));
+  async findAll() {
+    try {
+      return await firstValueFrom(this.client.send('employee.findAll', {}));
+    } catch (error) {
+      this.handleMicroserviceError(error);
+    }
   }
 
-  create(dto: CreateEmployeeDto) {
-    return firstValueFrom(this.client.send('employee.create', dto));
+  async create(dto: CreateEmployeeDto) {
+    try {
+      return await firstValueFrom(this.client.send('employee.create', dto));
+    } catch (error) {
+      this.handleMicroserviceError(error);
+    }
   }
 
-  findById(id: number) {
-    return firstValueFrom(this.client.send('employee.findById', id));
+  async findById(id: number) {
+    try {
+      return await firstValueFrom(this.client.send('employee.findById', id));
+    } catch (error) {
+      this.handleMicroserviceError(error);
+    }
   }
 
-  findByEmail(email: string) {
-    return firstValueFrom(this.client.send('employee.findByEmail', email));
+  async findByEmail(email: string) {
+    try {
+      return await firstValueFrom(
+        this.client.send('employee.findByEmail', email),
+      );
+    } catch (error) {
+      this.handleMicroserviceError(error);
+    }
   }
 
-  updateProfile(id: number, dto: UpdateEmployeeDto) {
-    return firstValueFrom(
-      this.client.send('employee.updateProfile', { id, dto }),
-    );
+  async updateProfile(id: number, dto: UpdateEmployeeDto) {
+    try {
+      return await firstValueFrom(
+        this.client.send('employee.updateProfile', { id, dto }),
+      );
+    } catch (error) {
+      this.handleMicroserviceError(error);
+    }
   }
 
-  updatePassword(id: number, dto: UpdatePasswordDto) {
-    return firstValueFrom(
-      this.client.send('employee.updatePassword', { id, dto }),
+  async updatePassword(id: number, dto: UpdatePasswordDto) {
+    try {
+      return await firstValueFrom(
+        this.client.send('employee.updatePassword', { id, dto }),
+      );
+    } catch (error) {
+      this.handleMicroserviceError(error);
+    }
+  }
+
+  async validateEmployee(email: string, password: string) {
+    try {
+      return await firstValueFrom(
+        this.client.send('employee.validate', { email, password }),
+      );
+    } catch (error) {
+      this.handleMicroserviceError(error);
+    }
+  }
+
+  private handleMicroserviceError(error: any): never {
+    // Handle RpcException - error data is in error.error property
+    if (error.error && error.error.statusCode) {
+      throw new HttpException(error.error.message, error.error.statusCode);
+    }
+
+    // Fallback for direct error properties
+    if (error.statusCode) {
+      throw new HttpException(error.message, error.statusCode);
+    }
+
+    // Handle unknown errors
+    throw new HttpException(
+      error.message || 'Internal server error',
+      HttpStatus.INTERNAL_SERVER_ERROR,
     );
   }
 }
