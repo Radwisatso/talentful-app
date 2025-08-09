@@ -1,0 +1,75 @@
+### Variables
+@baseUrl = http://localhost:3000
+@employeeId = 1
+
+### Get All Employees
+GET {{baseUrl}}/employees
+Content-Type: application/json
+
+### Create New Employee
+POST {{baseUrl}}/employees
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "john.doe@company.com",
+  "password": "password123",
+  "position": "Frontend Developer",
+  "phoneNumber": "081234567890",
+  "role": "EMPLOYEE"
+}
+
+### Create Admin Employee
+POST {{baseUrl}}/employees
+Content-Type: application/json
+
+{
+  "name": "Admin HRD",
+  "email": "admin@company.com", 
+  "password": "admin123",
+  "position": "HRD Manager",
+  "phoneNumber": "081234567891",
+  "role": "ADMIN"
+}
+
+### Get Employee by ID
+GET {{baseUrl}}/employees/{{employeeId}}
+Content-Type: application/json
+
+### Get Employee by Email
+GET {{baseUrl}}/employees/email/john.doe@company.com
+Content-Type: application/json
+
+### Update Employee Profile
+PATCH {{baseUrl}}/employees/{{employeeId}}/profile
+Content-Type: application/json
+
+{
+  "name": "John Doe Updated",
+  "position": "Senior Frontend Developer",
+  "phoneNumber": "081234567999",
+  "photoUrl": "https://example.com/photo.jpg"
+}
+
+### Update Employee Password
+PATCH {{baseUrl}}/employees/{{employeeId}}/password
+Content-Type: application/json
+
+{
+  "currentPassword": "password123",
+  "newPassword": "newpassword456"
+}
+
+### Test Error Cases
+
+### Get Non-existent Employee
+GET {{baseUrl}}/employees/999
+Content-Type: application/json
+
+### Update Non-existent Employee
+PATCH {{baseUrl}}/employees/999/profile
+Content-Type: application/json
+
+{
+  "name": "Test"
+}
