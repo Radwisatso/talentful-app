@@ -8110,6 +8110,7 @@ const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
 const attendance_api_gateway_module_1 = __webpack_require__(/*! ./attendance-api-gateway.module */ "./apps/attendance-api-gateway/src/attendance-api-gateway.module.ts");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(attendance_api_gateway_module_1.AttendanceApiGatewayModule);
+    app.enableCors();
     await app.listen(process.env.port ?? 3000);
 }
 bootstrap();
