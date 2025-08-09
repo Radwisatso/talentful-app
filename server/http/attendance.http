@@ -1,107 +1,107 @@
 ### Variables
 @baseUrl = http://localhost:3000
-@employeeId = 1
-@startDate = 2025-01-01
-@endDate = 2025-01-31
+@employeeToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMyLCJlbWFpbCI6ImpvaG4uZG9lQGNvbXBhbnkuY29tIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZSI6IkVNUExPWUVFIiwiaWF0IjoxNzU0NzI1MzQ0LCJleHAiOjE3NTQ3Mjg5NDR9.Ji13kIzx5g8Za8N1tg0STjmo8OY4itoUwsncVlS6Xvg
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMxLCJlbWFpbCI6ImFkbWluQGNvbXBhbnkuY29tIiwibmFtZSI6IkFkbWluIEhSRCIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1NDcyNTMzMSwiZXhwIjoxNzU0NzI4OTMxfQ.iaUHVHwDqqlqSBerUGQ9XilO9S9TLV94ryNsDiw-yBE
 
-### Check In
+### ========================================
+### UNIVERSAL ENDPOINTS (Smart Role Detection)
+### ========================================
+
+### Employee Check In (No employeeId = use own ID)
 POST {{baseUrl}}/attendances/checkin
+Authorization: Bearer {{employeeToken}}
 Content-Type: application/json
 
 {
-  "employeeId": {{employeeId}},
   "date": "2025-01-09T08:00:00.000Z",
   "time": "2025-01-09T08:00:00.000Z"
 }
 
-### Check Out
-POST {{baseUrl}}/attendances/checkout
+### Admin Check In for Self (No employeeId = use own ID)
+POST {{baseUrl}}/attendances/checkin
+Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "employeeId": {{employeeId}},
-  "date": "2025-01-09T17:00:00.000Z",
+  "date": "2025-01-09T08:00:00.000Z",
+  "time": "2025-01-09T08:00:00.000Z"
+}
+
+### Admin Check In for Other Employee (Specify employeeId)
+POST {{baseUrl}}/attendances/checkin
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{
+  "employeeId": 2,
+  "date": "2025-01-09T08:00:00.000Z",
+  "time": "2025-01-09T08:30:00.000Z"
+}
+
+### Employee Check Out (No employeeId = use own ID)
+POST {{baseUrl}}/attendances/checkout
+Authorization: Bearer {{employeeToken}}
+Content-Type: application/json
+
+{
+  "date": "2025-01-09T08:00:00.000Z",
   "time": "2025-01-09T17:00:00.000Z"
 }
 
-### Check In - Different Day
-POST {{baseUrl}}/attendances/checkin
-Content-Type: application/json
-
-{
-  "employeeId": {{employeeId}},
-  "date": "2025-01-08T08:30:00.000Z",
-  "time": "2025-01-08T08:30:00.000Z"
-}
-
-### Check Out - Different Day
+### Admin Check Out for Other Employee
 POST {{baseUrl}}/attendances/checkout
+Authorization: Bearer {{adminToken}}
 Content-Type: application/json
 
 {
-  "employeeId": {{employeeId}},
-  "date": "2025-01-08T17:30:00.000Z",
-  "time": "2025-01-08T17:30:00.000Z"
+  "employeeId": 2,
+  "date": "2025-01-09T08:00:00.000Z",
+  "time": "2025-01-09T17:30:00.000Z"
 }
 
-### Get Attendance Summary (Default: Current Month)
-GET {{baseUrl}}/attendances/summary?employeeId={{employeeId}}
-Content-Type: application/json
+### Employee Get Own Summary (No employeeId = own summary)
+GET {{baseUrl}}/attendances/summary?startDate=2025-01-01&endDate=2025-01-31
+Authorization: Bearer {{employeeToken}}
 
-### Get Attendance Summary with Date Range
-GET {{baseUrl}}/attendances/summary?employeeId={{employeeId}}&startDate={{startDate}}&endDate={{endDate}}
-Content-Type: application/json
+### Admin Get Own Summary (No employeeId = own summary)
+GET {{baseUrl}}/attendances/summary?startDate=2025-01-01&endDate=2025-01-31
+Authorization: Bearer {{adminToken}}
 
-### Get Attendance Summary - Different Employee
+### Admin Get Other Employee Summary (Specify employeeId)
 GET {{baseUrl}}/attendances/summary?employeeId=2&startDate=2025-01-01&endDate=2025-01-31
-Content-Type: application/json
+Authorization: Bearer {{adminToken}}
 
-### Get All Attendances (For Admin HRD)
+### Employee Get Own Records (No employeeId = own records)
+GET {{baseUrl}}/attendances/records
+Authorization: Bearer {{employeeToken}}
+
+### Admin Get Other Employee Records
+GET {{baseUrl}}/attendances/records?employeeId=2
+Authorization: Bearer {{adminToken}}
+
+### Admin Get All Attendances (Admin Only)
 GET {{baseUrl}}/attendances/all
-Content-Type: application/json
+Authorization: Bearer {{adminToken}}
 
-### Get Attendances by Specific Employee
-GET {{baseUrl}}/attendances/employee/{{employeeId}}
-Content-Type: application/json
+### ========================================
+### SECURITY TESTS
+### ========================================
 
-### Test Multiple Check-ins Same Day (Edge Case)
+### Employee trying to checkin for others (should ignore employeeId)
 POST {{baseUrl}}/attendances/checkin
+Authorization: Bearer {{employeeToken}}
 Content-Type: application/json
 
 {
-  "employeeId": {{employeeId}},
-  "date": "2025-01-07",
-  "time": "2025-01-07T09:00:00.000Z"
-}
-
-### Test Multiple Check-outs Same Day (Edge Case)
-POST {{baseUrl}}/attendances/checkout
-Content-Type: application/json
-
-{
-  "employeeId": {{employeeId}},
-  "date": "2025-01-07",
-  "time": "2025-01-07T18:00:00.000Z"
-}
-
-### Test Error Cases
-
-### Invalid Employee ID
-POST {{baseUrl}}/attendances/checkin
-Content-Type: application/json
-
-{
-  "employeeId": 9999,
-  "date": "2025-01-09",
+  "employeeId": 999,
+  "date": "2025-01-09T08:00:00.000Z",
   "time": "2025-01-09T08:00:00.000Z"
 }
 
-### Invalid Date Format
-POST {{baseUrl}}/attendances/checkin
-Content-Type: application/json
+### Employee trying to get other's summary (should get own)
+GET {{baseUrl}}/attendances/summary?employeeId=2
+Authorization: Bearer {{employeeToken}}
 
-{
-  "employeeId": {{employeeId}},
-  "date": "invalid-date",
-  "time": "2025-01-09T08:00:00.000Z"
-}
+### Employee trying admin endpoint - Should Return 403
+GET {{baseUrl}}/attendances/all
+Authorization: Bearer {{employeeToken}}

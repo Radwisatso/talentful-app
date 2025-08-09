@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AttendanceService } from './attendance.service';
 import { AttendanceController } from './attendance.controller';
-import { ClientsModule, Transport } from '@nestjs/microservices';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         },
       },
     ]),
+    forwardRef(() => AuthModule), // ← Import AuthModule untuk guards
   ],
   providers: [AttendanceService],
   controllers: [AttendanceController],
