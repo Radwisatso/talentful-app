@@ -6,8 +6,9 @@ import StatusBadge from "./_components/StatusBadge";
 import { apiClient } from "~/lib/api";
 import { onValue, ref } from "firebase/database";
 import { firebaseRealtimeDb } from "~/config/firebase";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { useState } from "react";
+import { useRevalidator } from "react-router";
 
 export function meta() {
   return [{ title: "Admin Dashboard - Dexa Attendance" }];
@@ -23,8 +24,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
   const { user: apiUser, employees: apiEmployees } = loaderData!;
   const user = apiUser!.user;
   const employees = apiEmployees; // Replace ini dengan data API Anda
-
-  const [notification, setNotification] = useState<string>("");
+  const revalidator = useRevalidator();
 
   const currentDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -74,7 +74,10 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
             </svg>
             Add Employee
           </Button>
-          <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+          <button
+            onClick={() => revalidator.revalidate()}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+          >
             <svg
               className="w-4 h-4 mr-2"
               fill="currentColor"

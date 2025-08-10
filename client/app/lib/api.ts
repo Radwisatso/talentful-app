@@ -70,6 +70,22 @@ interface Employee {
   updatedAt: string;
 }
 
+// Add interface for Admin Get All Attendances response
+interface Attendance {
+  id: number;
+  employeeId: number;
+  date: string;
+  time: string;
+  status: "CHECKIN" | "CHECKOUT";
+  createdAt: string;
+  employee: {
+    id: number;
+    name: string;
+    email: string;
+    position: string;
+  };
+}
+
 class ApiClient {
   private baseURL: string;
 
@@ -285,6 +301,25 @@ class ApiClient {
 
     return data;
   }
+
+  // ===== Admin Get All Attendances (Admin Only) =====
+  async getAllAttendances(): Promise<Attendance[]> {
+    const response = await fetch(`${this.baseURL}/attendances/all`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeader(),
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch all attendances");
+    }
+
+    return data;
+  }
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);
@@ -296,4 +331,5 @@ export type {
   UpdateProfileData,
   ChangePasswordData,
   Employee,
+  Attendance,
 };

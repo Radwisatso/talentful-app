@@ -1,7 +1,7 @@
 ### Variables
 @baseUrl = http://localhost:3000
 @employeeToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMyLCJlbWFpbCI6ImpvaG4uZG9lQGNvbXBhbnkuY29tIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZSI6IkVNUExPWUVFIiwiaWF0IjoxNzU0Nzk5NDM1LCJleHAiOjE3NTQ4MDMwMzV9.2I0ROus2aT9PxpGhotSaYBeK-N_l2lBQz7Mu_IAszbM
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMxLCJlbWFpbCI6ImFkbWluQGNvbXBhbnkuY29tIiwibmFtZSI6IkFkbWluIEhSRCIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1NDcyNTMzMSwiZXhwIjoxNzU0NzI4OTMxfQ.iaUHVHwDqqlqSBerUGQ9XilO9S9TLV94ryNsDiw-yBE
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMxLCJlbWFpbCI6ImFkbWluQGNvbXBhbnkuY29tIiwibmFtZSI6IkFkbWluIEhSRCIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1NDgyMDI1MywiZXhwIjoxNzU0ODIzODUzfQ.lfpohDUlHN31zR7LHolustNPGBOlXyc1rp2x25enx08
 
 ### ========================================
 ### UNIVERSAL ENDPOINTS (Smart Role Detection)

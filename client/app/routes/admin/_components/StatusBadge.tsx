@@ -1,5 +1,5 @@
 interface StatusBadgeProps {
-  status: "ADMIN" | "EMPLOYEE" | string;
+  status: "ADMIN" | "EMPLOYEE" | "CHECKIN" | "CHECKOUT" | string;
   className?: string;
 }
 
@@ -41,6 +41,40 @@ export default function StatusBadge({
               <path
                 fillRule="evenodd"
                 d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                clipRule="evenodd"
+              />
+            </svg>
+          ),
+        };
+      case "CHECKIN":
+        return {
+          classes: `${baseClasses} bg-green-100 text-green-800`,
+          icon: (
+            <svg
+              className="w-3 h-3 mr-1"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+          ),
+        };
+      case "CHECKOUT":
+        return {
+          classes: `${baseClasses} bg-orange-100 text-orange-800`,
+          icon: (
+            <svg
+              className="w-3 h-3 mr-1"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v3.586L7.707 9.293a1 1 0 00-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 10.586V7z"
                 clipRule="evenodd"
               />
             </svg>
