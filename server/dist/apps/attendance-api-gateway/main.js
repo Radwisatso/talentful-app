@@ -488,6 +488,7 @@ let AuthService = class AuthService {
                 role: employee.role,
                 position: employee.position,
                 photoUrl: employee.photoUrl,
+                phoneNumber: employee.phoneNumber,
             },
         };
     }

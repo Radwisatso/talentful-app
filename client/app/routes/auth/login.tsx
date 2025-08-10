@@ -27,6 +27,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
   */
   try {
     const loginResponse = await apiClient.login({ email, password });
+    console.log("Login Response:", loginResponse);
     localStorage.setItem("accessToken", loginResponse.access_token);
     localStorage.setItem("user", JSON.stringify(loginResponse.user));
 

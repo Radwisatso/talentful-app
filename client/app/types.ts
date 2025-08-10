@@ -5,6 +5,7 @@ export type UserAuth = {
     name: string;
     photoUrl?: string;
     position: string;
+    phoneNumber?: string;
     email: string;
     role: "EMPLOYEE" | "ADMIN";
   };
