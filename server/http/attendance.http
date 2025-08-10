@@ -1,6 +1,6 @@
 ### Variables
 @baseUrl = http://localhost:3000
-@employeeToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMyLCJlbWFpbCI6ImpvaG4uZG9lQGNvbXBhbnkuY29tIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZSI6IkVNUExPWUVFIiwiaWF0IjoxNzU0NzI1MzQ0LCJleHAiOjE3NTQ3Mjg5NDR9.Ji13kIzx5g8Za8N1tg0STjmo8OY4itoUwsncVlS6Xvg
+@employeeToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMyLCJlbWFpbCI6ImpvaG4uZG9lQGNvbXBhbnkuY29tIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZSI6IkVNUExPWUVFIiwiaWF0IjoxNzU0Nzk5NDM1LCJleHAiOjE3NTQ4MDMwMzV9.2I0ROus2aT9PxpGhotSaYBeK-N_l2lBQz7Mu_IAszbM
 @adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMxLCJlbWFpbCI6ImFkbWluQGNvbXBhbnkuY29tIiwibmFtZSI6IkFkbWluIEhSRCIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1NDcyNTMzMSwiZXhwIjoxNzU0NzI4OTMxfQ.iaUHVHwDqqlqSBerUGQ9XilO9S9TLV94ryNsDiw-yBE
 
 ### ========================================
@@ -60,7 +60,7 @@ Content-Type: application/json
 }
 
 ### Employee Get Own Summary (No employeeId = own summary)
-GET {{baseUrl}}/attendances/summary?startDate=2025-01-01&endDate=2025-01-31
+GET {{baseUrl}}/attendances/summary?startDate=2025-01-01&endDate=2025-12-31
 Authorization: Bearer {{employeeToken}}
 
 ### Admin Get Own Summary (No employeeId = own summary)
