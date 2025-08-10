@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import Card from "~/components/ui/Card";
 import type { Route } from "./+types/index";
 import { userContext } from "~/context";
-import Button from "~/components/ui/Button";
 import { apiClient, type AttendanceSummaryResponse } from "~/lib/api";
 
 export function meta() {

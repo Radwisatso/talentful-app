@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { uploadFile } from "@uploadcare/upload-client";
+import { onValue, ref, set } from "firebase/database";
+import { firebaseRealtimeDb } from "~/config/firebase";
 import Card from "~/components/ui/Card";
 import Button from "~/components/ui/Button";
 import type { Route } from "./+types/profile";
@@ -17,6 +19,7 @@ export async function clientLoader({ context }: Route.ClientLoaderArgs) {
 
 export default function EmployeeProfile({ loaderData }: Route.ComponentProps) {
   const user = loaderData!.user;
+  const db = firebaseRealtimeDb;
 
   // Tab state
   const [activeTab, setActiveTab] = useState<"profile" | "password">("profile");
@@ -45,6 +48,29 @@ export default function EmployeeProfile({ loaderData }: Route.ComponentProps) {
 
   // File preview state
   const [previewUrl, setPreviewUrl] = useState<string>(user.photoUrl || "");
+
+  // Function to write user data to Firebase Realtime Database
+  const writeUserData = (
+    userId: string,
+    email: string,
+    profile_picture: string | null | undefined,
+    message: string
+  ) => {
+    console.log("Writing user data to Firebase:");
+    set(ref(db, "users/" + userId), {
+      email,
+      profile_picture,
+      message,
+    });
+    /*
+    // THIS CODE WILL BE PUT ON ADMIN SIDE TO MONITOR USER UPDATES (FIREBASE REALTIME DB)
+    const userUpdating = ref(firebaseRealtimeDb, "users/");
+    onValue(userUpdating, (snapshot) => {
+        const data = snapshot.val();
+        console.log("Current user data:", data);
+    });
+    */
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -122,6 +148,12 @@ export default function EmployeeProfile({ loaderData }: Route.ComponentProps) {
       localStorage.setItem("user", JSON.stringify(newUserData));
 
       setMessage({ type: "success", text: "Profile updated successfully!" });
+      writeUserData(
+        user.id,
+        user.email,
+        updatedUser.photoUrl,
+        `Employee with id: ${user.id}, email: ${user.email}, has updated his/her profile`
+      );
     } catch (error: any) {
       console.error("Update profile error:", error);
       setMessage({
