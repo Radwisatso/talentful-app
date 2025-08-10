@@ -4,11 +4,10 @@ import type { Route } from "./+types/index";
 import { userContext } from "~/context";
 import StatusBadge from "./_components/StatusBadge";
 import { apiClient } from "~/lib/api";
-import { onValue, ref } from "firebase/database";
+import { onValue, ref, get } from "firebase/database";
 import { firebaseRealtimeDb } from "~/config/firebase";
-import { ToastContainer } from "react-toastify";
-import { useState } from "react";
 import { useRevalidator } from "react-router";
+import toast, { Toaster } from "react-hot-toast";
 
 export function meta() {
   return [{ title: "Admin Dashboard - Dexa Attendance" }];
@@ -42,8 +41,18 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
 
   const userUpdating = ref(firebaseRealtimeDb, "users/");
   onValue(userUpdating, (snapshot) => {
-    const data = { ...snapshot.val() };
-    console.log("Current user data:", data);
+    const data = snapshot.exportVal();
+    if (data) {
+      const userData = Object.values(data)[0] as {
+        email: string;
+        message: string;
+        profile_picture: string;
+      };
+      toast.success(userData.message, {
+        position: "bottom-right",
+        id: userData.email,
+      });
+    }
   });
 
   return (
@@ -54,6 +63,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
           <h1 className="text-2xl font-bold leading-7 text-gray-900 sm:text-3xl">
             Admin Dashboard
           </h1>
+          <Toaster />
           <p className="mt-1 text-sm text-gray-500">
             Welcome back, {user.name}
           </p>
@@ -293,8 +303,6 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
           </div>
         </div>
       </Card>
-
-      <ToastContainer position="bottom-right" stacked />
     </div>
   );
 }

@@ -7,8 +7,7 @@ import Button from "~/components/ui/Button";
 import type { Route } from "./+types/profile";
 import { userContext } from "~/context";
 import { apiClient, type ChangePasswordData } from "~/lib/api";
-
-import { toast } from "react-toastify";
+import toast, { Toaster } from "react-hot-toast";
 
 export function meta() {
   return [{ title: "Profile - Dexa Attendance" }];
@@ -58,13 +57,11 @@ export default function EmployeeProfile({ loaderData }: Route.ComponentProps) {
     profile_picture: string | null | undefined,
     message: string
   ) => {
-    const notify = () => toast(message);
     set(ref(db, "users/" + userId), {
       email,
       profile_picture,
       message,
     });
-    notify();
 
     /*
     // THIS CODE WILL BE PUT ON ADMIN SIDE TO MONITOR USER UPDATES (FIREBASE REALTIME DB)
@@ -156,7 +153,7 @@ export default function EmployeeProfile({ loaderData }: Route.ComponentProps) {
         user.id,
         user.email,
         updatedUser.photoUrl,
-        `Employee with id: ${user.id}, email: ${user.email}, has updated his/her profile`
+        `${user.email} has updated his/her profile`
       );
     } catch (error: any) {
       console.error("Update profile error:", error);
@@ -212,7 +209,6 @@ export default function EmployeeProfile({ loaderData }: Route.ComponentProps) {
   return (
     <div className="max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-900 mb-6">My Profile</h1>
-
       {/* Tab Navigation */}
       <div className="flex space-x-1 mb-6 bg-gray-100 p-1 rounded-lg">
         <button
