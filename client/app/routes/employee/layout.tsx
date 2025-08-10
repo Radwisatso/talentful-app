@@ -1,6 +1,30 @@
-import { Link, NavLink, Outlet, useNavigate } from "react-router";
+import { NavLink, Outlet, redirect, useNavigate } from "react-router";
 import Footer from "~/components/ui/Footer";
 import Header from "~/components/ui/Header";
+import { userContext } from "~/context";
+import type { Route } from "./+types/layout";
+
+//@ts-ignore
+async function authMiddleware({ context }, next) {
+  const accessToken = localStorage.getItem("accessToken");
+  const userStr = localStorage.getItem("user") ?? null;
+  const user = userStr ? JSON.parse(userStr) : null;
+  console.log("Auth Middleware - Access Token:", accessToken);
+  if (accessToken && user) {
+    context.set(userContext, { accessToken, user });
+    await next();
+  } else {
+    throw redirect("/auth/login");
+  }
+}
+
+export const unstable_clientMiddleware: Route.unstable_ClientMiddlewareFunction[] =
+  [authMiddleware];
+
+export async function clientLoader({ context }: Route.ClientLoaderArgs) {
+  const user = context.get(userContext);
+  return user;
+}
 
 export default function EmployeeLayout() {
   const navigate = useNavigate();
@@ -13,16 +37,11 @@ export default function EmployeeLayout() {
   // Get user from localStorage
   const userStr = localStorage.getItem("user") ?? null;
   const user = userStr ? JSON.parse(userStr) : null;
-
+  console.log("Mana dulu yang jalan");
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <Header
-        variant={user.role.toLowerCase()}
-        user={user}
-        onLogout={handleLogout}
-      />
-
+      <Header variant={user.role} user={user} onLogout={handleLogout} />
       {/* Navigation */}
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -64,7 +83,7 @@ export default function EmployeeLayout() {
       </main>
 
       {/* Footer Component */}
-      <Footer variant={user.role.toLowerCase()} />
+      <Footer variant={user.role} />
     </div>
   );
 }

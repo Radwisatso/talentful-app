@@ -1,14 +1,22 @@
 import Card from "~/components/ui/Card";
-import Button from "~/components/ui/Button";
+import type { Route } from "./+types/index";
+import { userContext } from "~/context";
 
 export function meta() {
   return [{ title: "Employee Dashboard - Dexa Attendance" }];
 }
 
-export default function EmployeeDashboard() {
+export async function clientLoader({ context }: Route.ClientLoaderArgs) {
+  const user = context.get(userContext);
+  return user;
+}
+
+export default function EmployeeDashboard({
+  loaderData,
+}: Route.ComponentProps) {
   // Get user from localStorage
-  const userStr = localStorage.getItem("user") ?? null;
-  const user = userStr ? JSON.parse(userStr) : null;
+  console.log("Loader Data:", loaderData);
+  const user = loaderData?.user;
 
   return (
     <div>

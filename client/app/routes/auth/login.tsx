@@ -1,7 +1,7 @@
 import Button from "~/components/ui/Button";
 import type { Route } from "./+types/login";
 import { Form, redirect, useNavigation } from "react-router";
-import { apiClient, type ApiError } from "~/lib/api";
+import { apiClient } from "~/lib/api";
 
 export function meta() {
   return [{ title: "Login - Dexa Attendance System" }];

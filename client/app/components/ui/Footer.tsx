@@ -1,13 +1,13 @@
 interface FooterProps {
-  variant?: "default" | "employee" | "admin";
+  variant?: "default" | "EMPLOYEE" | "ADMIN";
 }
 
 export default function Footer({ variant = "default" }: FooterProps) {
   const getFooterText = () => {
     switch (variant) {
-      case "employee":
+      case "EMPLOYEE":
         return "© 2024 Dexa Attendance System - Employee Portal";
-      case "admin":
+      case "ADMIN":
         return "© 2024 Dexa Attendance System - Admin Portal";
       default:
         return "© 2024 Dexa Attendance System";

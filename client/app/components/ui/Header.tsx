@@ -1,5 +1,5 @@
 interface HeaderProps {
-  variant?: "default" | "employee" | "admin";
+  variant?: "default" | "EMPLOYEE" | "ADMIN";
   user?: {
     name: string;
     role?: string;
@@ -14,13 +14,13 @@ export default function Header({
 }: HeaderProps) {
   const getBadgeInfo = () => {
     switch (variant) {
-      case "employee":
+      case "EMPLOYEE":
         return {
           text: "Employee",
           bgColor: "bg-blue-100",
           textColor: "text-blue-800",
         };
-      case "admin":
+      case "ADMIN":
         return {
           text: "Admin",
           bgColor: "bg-purple-100",
