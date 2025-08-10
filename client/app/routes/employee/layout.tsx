@@ -9,7 +9,6 @@ async function authMiddleware({ context }, next) {
   const accessToken = localStorage.getItem("accessToken");
   const userStr = localStorage.getItem("user") ?? null;
   const user = userStr ? JSON.parse(userStr) : null;
-  console.log("Auth Middleware - Access Token:", accessToken);
   if (accessToken && user) {
     context.set(userContext, { accessToken, user });
     await next();
