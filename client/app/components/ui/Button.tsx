@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+
 interface ButtonProps {
   children: React.ReactNode;
   href?: string;
@@ -20,9 +22,9 @@ export default function Button({
 
   if (href) {
     return (
-      <a href={href} className={buttonClasses}>
+      <Link to={href} className={buttonClasses}>
         {children}
-      </a>
+      </Link>
     );
   }
 

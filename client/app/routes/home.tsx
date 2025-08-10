@@ -16,7 +16,7 @@ export default function Home() {
         {/* Header */}
         <div className="text-center mb-16">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Dexa Attendance System
+            Talentful Attendance System
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Modern employee attendance management system with real-time
@@ -103,7 +103,7 @@ export default function Home() {
 
         {/* CTA */}
         <div className="text-center">
-          <Button href="/login">Sign In to Dashboard</Button>
+          <Button href="/auth/login">Sign In to Dashboard</Button>
         </div>
 
         {/* Footer Info */}
