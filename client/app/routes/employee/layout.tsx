@@ -1,4 +1,10 @@
-import { NavLink, Outlet, redirect, useNavigate } from "react-router";
+import {
+  NavLink,
+  Outlet,
+  redirect,
+  useNavigate,
+  type NavLinkRenderProps,
+} from "react-router";
 import Footer from "~/components/ui/Footer";
 import Header from "~/components/ui/Header";
 import { userContext } from "~/context";
@@ -25,49 +31,53 @@ export async function clientLoader({ context }: Route.ClientLoaderArgs) {
   return user;
 }
 
-export default function EmployeeLayout() {
+export default function EmployeeLayout({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
+  const user = loaderData!.user;
+
+  const getNavLinkClass = ({
+    isActive,
+    isPending,
+    isTransitioning,
+  }: NavLinkRenderProps) => {
+    return [
+      "whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm",
+      isActive
+        ? "border-blue-500 text-blue-600"
+        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300",
+      isPending ? "opacity-50" : "",
+      isTransitioning ? "transition-colors duration-200" : "",
+    ].join(" ");
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
     navigate("/auth/login");
   };
 
-  // Get user from localStorage
-  const userStr = localStorage.getItem("user") ?? null;
-  const user = userStr ? JSON.parse(userStr) : null;
-  console.log("Mana dulu yang jalan");
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <Header variant={user.role} user={user} onLogout={handleLogout} />
+
       {/* Navigation */}
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8">
-            <NavLink
-              to="/employee"
-              className="border-blue-500 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-            >
+            <NavLink to="/employee" end className={getNavLinkClass}>
               Dashboard
             </NavLink>
 
-            <NavLink
-              to="/employee/attendance"
-              className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
-            >
+            <NavLink to="/employee/attendance" className={getNavLinkClass}>
               Check In/Out
             </NavLink>
-            <NavLink
-              to="/employee/history"
-              className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
-            >
+
+            <NavLink to="/employee/history" className={getNavLinkClass}>
               History
             </NavLink>
-            <NavLink
-              to="/employee/profile"
-              className="border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200"
-            >
+
+            <NavLink to="/employee/profile" className={getNavLinkClass}>
               Profile
             </NavLink>
           </div>

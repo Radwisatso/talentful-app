@@ -14,9 +14,7 @@ export async function clientLoader({ context }: Route.ClientLoaderArgs) {
 export default function EmployeeDashboard({
   loaderData,
 }: Route.ComponentProps) {
-  // Get user from localStorage
-  console.log("Loader Data:", loaderData);
-  const user = loaderData?.user;
+  const user = loaderData!.user;
 
   return (
     <div>
