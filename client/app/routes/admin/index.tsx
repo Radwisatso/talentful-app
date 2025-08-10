@@ -273,9 +273,12 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button className="text-green-600 hover:text-green-900 mr-3">
+                      <Button
+                        href={`/admin/employees/${employee.id}/edit`}
+                        className="text-blue-600 hover:text-blue-200"
+                      >
                         Edit
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 ))

@@ -65,7 +65,7 @@ interface Employee {
   position: string;
   role: "ADMIN" | "EMPLOYEE";
   phoneNumber?: string;
-  photoUrl?: string;
+  photoUrl?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -78,6 +78,15 @@ interface CreateEmployeeRequest {
   position: string;
   role: "ADMIN" | "EMPLOYEE";
   phoneNumber?: string;
+}
+
+// Add interface for Update Employee Profile request
+interface UpdateEmployeeProfileRequest {
+  name?: string;
+  email?: string;
+  position?: string;
+  phoneNumber?: string;
+  role?: "ADMIN" | "EMPLOYEE";
 }
 
 class ApiClient {
@@ -334,6 +343,51 @@ class ApiClient {
 
     return data;
   }
+
+  // ===== Get Employee by ID (Admin Only) =====
+  async getEmployeeById(employeeId: string | number): Promise<Employee> {
+    const response = await fetch(`${this.baseURL}/employees/${employeeId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeader(),
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch employee");
+    }
+
+    return data;
+  }
+
+  // ===== Admin Update Any Employee Profile ✅
+  async updateEmployeeProfile(
+    employeeId: string | number,
+    profileData: UpdateEmployeeProfileRequest
+  ): Promise<Employee> {
+    const response = await fetch(
+      `${this.baseURL}/employees/${employeeId}/profile`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...this.getAuthHeader(),
+        },
+        body: JSON.stringify(profileData),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to update employee profile");
+    }
+
+    return data;
+  }
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);
@@ -346,4 +400,5 @@ export type {
   ChangePasswordData,
   Employee,
   CreateEmployeeRequest,
+  UpdateEmployeeProfileRequest,
 };
