@@ -14,6 +14,7 @@ interface LoginResponse {
     role: "EMPLOYEE" | "ADMIN";
     position?: string;
     phoneNumber?: string;
+    photoUrl?: string;
   };
 }
 
@@ -44,6 +45,11 @@ interface AttendanceSummaryResponse {
       endDate: string;
     };
   };
+}
+
+interface UpdateProfileData {
+  phoneNumber?: string;
+  photoUrl?: string;
 }
 
 class ApiClient {
@@ -180,6 +186,39 @@ class ApiClient {
     console.log("Today Attendance Data:", data);
     return data;
   }
+
+  // Update employee profile
+  async updateProfile(
+    profileData: UpdateProfileData
+  ): Promise<LoginResponse["user"]> {
+    // Get user ID from localStorage
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+
+    if (!user?.id) {
+      throw new Error("User not found in localStorage");
+    }
+
+    const response = await fetch(
+      `${this.baseURL}/employees/${user.id}/profile`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...this.getAuthHeader(),
+        },
+        body: JSON.stringify(profileData),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to update profile");
+    }
+
+    return data;
+  }
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);
@@ -188,4 +227,5 @@ export type {
   LoginResponse,
   AttendanceRecord,
   AttendanceSummaryResponse,
+  UpdateProfileData,
 };
