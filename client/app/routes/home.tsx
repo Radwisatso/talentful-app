@@ -1,5 +1,6 @@
 import type { Route } from "./+types/home";
 import Button from "../components/ui/Button";
+import Card from "../components/ui/Card";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -25,7 +26,7 @@ export default function Home() {
 
         {/* Features */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <Card>
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
               <svg
                 className="w-6 h-6 text-blue-600"
@@ -48,9 +49,9 @@ export default function Home() {
               Track employee check-in and check-out times with precise timestamp
               recording.
             </p>
-          </div>
+          </Card>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <Card>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
               <svg
                 className="w-6 h-6 text-green-600"
@@ -73,9 +74,9 @@ export default function Home() {
               Generate detailed attendance reports with analytics and export
               capabilities.
             </p>
-          </div>
+          </Card>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <Card>
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
               <svg
                 className="w-6 h-6 text-purple-600"
@@ -97,7 +98,7 @@ export default function Home() {
             <p className="text-gray-600">
               Secure role-based access control for employees and administrators.
             </p>
-          </div>
+          </Card>
         </div>
 
         {/* CTA */}
