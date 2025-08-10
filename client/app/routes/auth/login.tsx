@@ -34,7 +34,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
     if (loginResponse.user.role === "ADMIN") {
       return redirect("/admin");
     } else {
-      return redirect("/dashboard");
+      return redirect("/employee");
     }
   } catch (error) {
     if (error instanceof Response) {

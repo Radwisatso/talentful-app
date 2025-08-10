@@ -11,4 +11,7 @@ export default [
   ...prefix("auth", [
     layout("routes/auth/layout.tsx", [route("login", "routes/auth/login.tsx")]),
   ]),
+  ...prefix("employee", [
+    layout("routes/employee/layout.tsx", [index("routes/employee/index.tsx")]),
+  ]),
 ] satisfies RouteConfig;

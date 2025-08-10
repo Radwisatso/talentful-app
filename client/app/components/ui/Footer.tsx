@@ -1,0 +1,24 @@
+interface FooterProps {
+  variant?: "default" | "employee" | "admin";
+}
+
+export default function Footer({ variant = "default" }: FooterProps) {
+  const getFooterText = () => {
+    switch (variant) {
+      case "employee":
+        return "© 2024 Dexa Attendance System - Employee Portal";
+      case "admin":
+        return "© 2024 Dexa Attendance System - Admin Portal";
+      default:
+        return "© 2024 Dexa Attendance System";
+    }
+  };
+
+  return (
+    <footer className="bg-white border-t border-gray-200 mt-auto">
+      <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+        <p className="text-center text-sm text-gray-500">{getFooterText()}</p>
+      </div>
+    </footer>
+  );
+}
