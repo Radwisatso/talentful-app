@@ -14,7 +14,6 @@ export default [
   ...prefix("employee", [
     layout("routes/employee/layout.tsx", [
       index("routes/employee/index.tsx"),
-      route("attendance", "routes/employee/attendance.tsx"),
       route("profile", "routes/employee/profile.tsx"),
       route("history", "routes/employee/history.tsx"),
     ]),

@@ -69,10 +69,6 @@ export default function EmployeeLayout({ loaderData }: Route.ComponentProps) {
               Dashboard
             </NavLink>
 
-            <NavLink to="/employee/attendance" className={getNavLinkClass}>
-              Check In/Out
-            </NavLink>
-
             <NavLink to="/employee/history" className={getNavLinkClass}>
               History
             </NavLink>

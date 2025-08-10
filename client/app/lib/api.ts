@@ -17,7 +17,6 @@ interface LoginResponse {
   };
 }
 
-// Response structure sesuai dengan actual response Anda
 interface AttendanceRecord {
   id: number;
   employeeId: number;
@@ -77,7 +76,6 @@ class ApiClient {
     return data;
   }
 
-  // Get attendance history via summary endpoint
   async getAttendanceHistory(): Promise<AttendanceSummaryResponse> {
     const response = await fetch(
       `${this.baseURL}/attendances/summary?startDate=2025-01-01&endDate=2025-12-31`,
@@ -91,10 +89,95 @@ class ApiClient {
     );
 
     const data = await response.json();
+
     if (!response.ok) {
       throw new Error(data.message || "Failed to fetch attendance history");
     }
 
+    return data;
+  }
+
+  // Check-in
+  async checkIn(): Promise<AttendanceRecord> {
+    const now = new Date();
+    const response = await fetch(`${this.baseURL}/attendances/checkin`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeader(),
+      },
+      body: JSON.stringify({
+        date: now.toISOString(),
+        time: now.toISOString(),
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to check in");
+    }
+
+    return data;
+  }
+
+  // Check-out
+  async checkOut(): Promise<AttendanceRecord> {
+    const now = new Date();
+    const response = await fetch(`${this.baseURL}/attendances/checkout`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeader(),
+      },
+      body: JSON.stringify({
+        date: now.toISOString(),
+        time: now.toISOString(),
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to check out");
+    }
+
+    return data;
+  }
+
+  // Get today's attendance status
+  async getTodayAttendance(): Promise<AttendanceSummaryResponse> {
+    const now = new Date();
+
+    // Start of today (00:00:00)
+    const startOfDay = new Date(now);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    // End of today (23:59:59)
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Format to YYYY-MM-DDT17:00:00.000Z for API
+    const startDate = startOfDay.toISOString();
+    const endDate = endOfDay.toISOString();
+
+    const response = await fetch(
+      `${this.baseURL}/attendances/summary?startDate=${startDate}&endDate=${endDate}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...this.getAuthHeader(),
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch today attendance");
+    }
+    console.log("Today Attendance Data:", data);
     return data;
   }
 }
