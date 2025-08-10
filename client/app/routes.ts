@@ -18,4 +18,11 @@ export default [
       route("history", "routes/employee/history.tsx"),
     ]),
   ]),
+  ...prefix("admin", [
+    layout("routes/admin/layout.tsx", [
+      index("routes/admin/index.tsx"),
+      route("employees/:id", "routes/admin/employee-detail.tsx"),
+      route("attendances", "routes/admin/attendance.tsx"),
+    ]),
+  ]),
 ] satisfies RouteConfig;
