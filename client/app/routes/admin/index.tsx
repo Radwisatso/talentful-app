@@ -60,7 +60,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
           <p className="text-sm text-gray-400">{currentDate}</p>
         </div>
         <div className="mt-4 flex md:mt-0 md:ml-4 space-x-3">
-          <Button className="px-4 py-2">
+          <Button href="/admin/employees/add" className="px-4 py-2">
             <svg
               className="w-4 h-4 mr-2"
               fill="currentColor"

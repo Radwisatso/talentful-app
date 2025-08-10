@@ -70,20 +70,14 @@ interface Employee {
   updatedAt: string;
 }
 
-// Add interface for Admin Get All Attendances response
-interface Attendance {
-  id: number;
-  employeeId: number;
-  date: string;
-  time: string;
-  status: "CHECKIN" | "CHECKOUT";
-  createdAt: string;
-  employee: {
-    id: number;
-    name: string;
-    email: string;
-    position: string;
-  };
+// Add interface for Create Employee request
+interface CreateEmployeeRequest {
+  name: string;
+  email: string;
+  password: string;
+  position: string;
+  role: "ADMIN" | "EMPLOYEE";
+  phoneNumber?: string;
 }
 
 class ApiClient {
@@ -303,7 +297,7 @@ class ApiClient {
   }
 
   // ===== Admin Get All Attendances (Admin Only) =====
-  async getAllAttendances(): Promise<Attendance[]> {
+  async getAllAttendances(): Promise<AttendanceRecord[]> {
     const response = await fetch(`${this.baseURL}/attendances/all`, {
       method: "GET",
       headers: {
@@ -320,6 +314,26 @@ class ApiClient {
 
     return data;
   }
+
+  // ===== Create New Employee (Admin Only) =====
+  async createEmployee(employeeData: CreateEmployeeRequest): Promise<Employee> {
+    const response = await fetch(`${this.baseURL}/employees`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeader(),
+      },
+      body: JSON.stringify(employeeData),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to create employee");
+    }
+
+    return data;
+  }
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);
@@ -331,5 +345,5 @@ export type {
   UpdateProfileData,
   ChangePasswordData,
   Employee,
-  Attendance,
+  CreateEmployeeRequest,
 };
