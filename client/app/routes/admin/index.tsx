@@ -2,6 +2,12 @@ import Card from "~/components/ui/Card";
 import Button from "~/components/ui/Button";
 import type { Route } from "./+types/index";
 import { userContext } from "~/context";
+import StatusBadge from "./_components/StatusBadge";
+import { apiClient } from "~/lib/api";
+import { onValue, ref } from "firebase/database";
+import { firebaseRealtimeDb } from "~/config/firebase";
+import { ToastContainer, toast } from "react-toastify";
+import { useState } from "react";
 
 export function meta() {
   return [{ title: "Admin Dashboard - Dexa Attendance" }];
@@ -9,65 +15,16 @@ export function meta() {
 
 export async function clientLoader({ context }: Route.ClientLoaderArgs) {
   const user = context.get(userContext);
-  return user;
+  const employees = await apiClient.getAllEmployees();
+  return { user, employees };
 }
 
-// Mock data untuk employees
-const mockEmployees = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john.doe@company.com",
-    position: "Software Engineer",
-    status: "Present",
-    checkIn: "09:00",
-    checkOut: "-",
-    photoUrl: null,
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane.smith@company.com",
-    position: "Product Manager",
-    status: "Present",
-    checkIn: "08:45",
-    checkOut: "-",
-    photoUrl: null,
-  },
-  {
-    id: 3,
-    name: "Mike Johnson",
-    email: "mike.johnson@company.com",
-    position: "UI/UX Designer",
-    status: "Late",
-    checkIn: "09:15",
-    checkOut: "-",
-    photoUrl: null,
-  },
-  {
-    id: 4,
-    name: "Sarah Wilson",
-    email: "sarah.wilson@company.com",
-    position: "HR Manager",
-    status: "Absent",
-    checkIn: "-",
-    checkOut: "-",
-    photoUrl: null,
-  },
-  {
-    id: 5,
-    name: "David Brown",
-    email: "david.brown@company.com",
-    position: "DevOps Engineer",
-    status: "Present",
-    checkIn: "08:30",
-    checkOut: "17:30",
-    photoUrl: null,
-  },
-];
-
 export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
-  const user = loaderData!.user;
+  const { user: apiUser, employees: apiEmployees } = loaderData!;
+  const user = apiUser!.user;
+  const employees = apiEmployees; // Replace ini dengan data API Anda
+
+  const [notification, setNotification] = useState<string>("");
 
   const currentDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -76,21 +33,18 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
     day: "numeric",
   });
 
-  const getStatusBadge = (status: string) => {
-    const baseClasses =
-      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
-
-    switch (status) {
-      case "Present":
-        return `${baseClasses} bg-green-100 text-green-800`;
-      case "Late":
-        return `${baseClasses} bg-yellow-100 text-yellow-800`;
-      case "Absent":
-        return `${baseClasses} bg-red-100 text-red-800`;
-      default:
-        return `${baseClasses} bg-gray-100 text-gray-800`;
-    }
+  const stats = {
+    total: employees.length,
+    employeeCount: employees.filter((emp) => emp.role === "EMPLOYEE").length,
+    adminCount: employees.filter((emp) => emp.role === "ADMIN").length,
+    withPhone: employees.filter((emp) => emp.phoneNumber).length,
   };
+
+  const userUpdating = ref(firebaseRealtimeDb, "users/");
+  onValue(userUpdating, (snapshot) => {
+    const data = { ...snapshot.val() };
+    console.log("Current user data:", data);
+  });
 
   return (
     <div className="space-y-6">
@@ -128,16 +82,16 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
             >
               <path
                 fillRule="evenodd"
-                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
                 clipRule="evenodd"
               />
             </svg>
-            Export Data
+            Refresh
           </button>
         </div>
       </div>
 
-      {/* Stats Overview */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <Card className="p-6">
           <div className="flex items-center">
@@ -153,10 +107,10 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
               </div>
             </div>
             <div className="ml-4">
-              <dt className="text-sm font-medium text-gray-500">
-                Total Employees
-              </dt>
-              <dd className="text-2xl font-bold text-gray-900">5</dd>
+              <dt className="text-sm font-medium text-gray-500">Total Users</dt>
+              <dd className="text-2xl font-bold text-gray-900">
+                {stats.total}
+              </dd>
             </div>
           </div>
         </Card>
@@ -170,19 +124,15 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clipRule="evenodd"
-                  />
+                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                 </svg>
               </div>
             </div>
             <div className="ml-4">
-              <dt className="text-sm font-medium text-gray-500">
-                Present Today
-              </dt>
-              <dd className="text-2xl font-bold text-green-600">3</dd>
+              <dt className="text-sm font-medium text-gray-500">Employees</dt>
+              <dd className="text-2xl font-bold text-green-600">
+                {stats.employeeCount}
+              </dd>
             </div>
           </div>
         </Card>
@@ -190,23 +140,21 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
         <Card className="p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
                 <svg
                   className="w-4 h-4 text-white"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z"
-                    clipRule="evenodd"
-                  />
+                  <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
                 </svg>
               </div>
             </div>
             <div className="ml-4">
-              <dt className="text-sm font-medium text-gray-500">Late Today</dt>
-              <dd className="text-2xl font-bold text-yellow-600">1</dd>
+              <dt className="text-sm font-medium text-gray-500">Admins</dt>
+              <dd className="text-2xl font-bold text-purple-600">
+                {stats.adminCount}
+              </dd>
             </div>
           </div>
         </Card>
@@ -214,7 +162,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
         <Card className="p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center">
                 <svg
                   className="w-4 h-4 text-white"
                   fill="currentColor"
@@ -222,17 +170,17 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
                 >
                   <path
                     fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                    d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.223a1.5 1.5 0 01-1.052 1.767l-.933.267c-.41.117-.643.555-.48.95a11.542 11.542 0 006.254 6.254c.395.163.833-.07.95-.48l.267-.933a1.5 1.5 0 011.767-1.052l3.223.716A1.5 1.5 0 0118 15.352V16.5a1.5 1.5 0 01-1.5 1.5H15c-1.149 0-2.263-.15-3.326-.43A13.022 13.022 0 012.43 8.326 13.019 13.019 0 012 5V3.5z"
                     clipRule="evenodd"
                   />
                 </svg>
               </div>
             </div>
             <div className="ml-4">
-              <dt className="text-sm font-medium text-gray-500">
-                Absent Today
-              </dt>
-              <dd className="text-2xl font-bold text-red-600">1</dd>
+              <dt className="text-sm font-medium text-gray-500">With Phone</dt>
+              <dd className="text-2xl font-bold text-gray-600">
+                {stats.withPhone}
+              </dd>
             </div>
           </div>
         </Card>
@@ -245,33 +193,8 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
             <h3 className="text-lg font-medium text-gray-900">
               Employee Management
             </h3>
-            <div className="flex items-center space-x-3">
-              <div className="relative">
-                <input
-                  type="text"
-                  placeholder="Search employees..."
-                  className="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center">
-                  <svg
-                    className="w-4 h-4 text-gray-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </div>
-              <select className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="all">All Status</option>
-                <option value="present">Present</option>
-                <option value="late">Late</option>
-                <option value="absent">Absent</option>
-              </select>
+            <div className="text-sm text-gray-500">
+              Total: {employees.length} users
             </div>
           </div>
         </div>
@@ -287,13 +210,13 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
                   Position
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  Role
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Check In
+                  Phone Number
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Check Out
+                  Created At
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -301,34 +224,20 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {mockEmployees.map((employee) => (
-                <tr key={employee.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-10 w-10">
-                        {employee.photoUrl ? (
-                          <img
-                            className="h-10 w-10 rounded-full object-cover"
-                            src={employee.photoUrl}
-                            alt={employee.name}
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-full bg-gray-300 flex items-center justify-center">
-                            <svg
-                              className="w-6 h-6 text-gray-400"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                          </div>
-                        )}
-                      </div>
-                      <div className="ml-4">
+              {employees.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={6}
+                    className="px-6 py-12 text-center text-gray-500"
+                  >
+                    No employees found
+                  </td>
+                </tr>
+              ) : (
+                employees.map((employee) => (
+                  <tr key={employee.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div>
                         <div className="text-sm font-medium text-gray-900">
                           {employee.name}
                         </div>
@@ -336,75 +245,50 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
                           {employee.email}
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {employee.position}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={getStatusBadge(employee.status)}>
-                      {employee.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {employee.checkIn}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {employee.checkOut}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button className="text-blue-600 hover:text-blue-900 mr-3">
-                      View
-                    </button>
-                    <button className="text-green-600 hover:text-green-900 mr-3">
-                      Edit
-                    </button>
-                    <button className="text-red-600 hover:text-red-900">
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">
+                        {employee.position}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <StatusBadge status={employee.role} />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {employee.phoneNumber || (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(employee.createdAt).toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        }
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button className="text-green-600 hover:text-green-900 mr-3">
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
 
-        {/* Pagination */}
-        <div className="bg-white px-6 py-3 border-t border-gray-200 flex items-center justify-between">
-          <div className="flex-1 flex justify-between sm:hidden">
-            <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-              Previous
-            </button>
-            <button className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-              Next
-            </button>
-          </div>
-          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm text-gray-700">
-                Showing <span className="font-medium">1</span> to{" "}
-                <span className="font-medium">5</span> of{" "}
-                <span className="font-medium">5</span> results
-              </p>
-            </div>
-            <div>
-              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
-                <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                  Previous
-                </button>
-                <button className="bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
-                  1
-                </button>
-                <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                  Next
-                </button>
-              </nav>
-            </div>
+        <div className="bg-white px-6 py-3 border-t border-gray-200">
+          <div className="text-sm text-gray-700">
+            Showing all {employees.length} employees
           </div>
         </div>
       </Card>
+
+      <ToastContainer position="bottom-right" stacked />
     </div>
   );
 }

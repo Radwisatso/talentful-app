@@ -1,12 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { uploadFile } from "@uploadcare/upload-client";
-import { onValue, ref, set } from "firebase/database";
+import { ref, set } from "firebase/database";
 import { firebaseRealtimeDb } from "~/config/firebase";
 import Card from "~/components/ui/Card";
 import Button from "~/components/ui/Button";
 import type { Route } from "./+types/profile";
 import { userContext } from "~/context";
 import { apiClient, type ChangePasswordData } from "~/lib/api";
+
+import { toast } from "react-toastify";
 
 export function meta() {
   return [{ title: "Profile - Dexa Attendance" }];
@@ -56,12 +58,14 @@ export default function EmployeeProfile({ loaderData }: Route.ComponentProps) {
     profile_picture: string | null | undefined,
     message: string
   ) => {
-    console.log("Writing user data to Firebase:");
+    const notify = () => toast(message);
     set(ref(db, "users/" + userId), {
       email,
       profile_picture,
       message,
     });
+    notify();
+
     /*
     // THIS CODE WILL BE PUT ON ADMIN SIDE TO MONITOR USER UPDATES (FIREBASE REALTIME DB)
     const userUpdating = ref(firebaseRealtimeDb, "users/");

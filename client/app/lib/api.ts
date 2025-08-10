@@ -57,6 +57,19 @@ interface ChangePasswordData {
   newPassword: string;
 }
 
+// ===== Employee Interface for getAllEmployees =====
+interface Employee {
+  id: number;
+  name: string;
+  email: string;
+  position: string;
+  role: "ADMIN" | "EMPLOYEE";
+  phoneNumber?: string;
+  photoUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 class ApiClient {
   private baseURL: string;
 
@@ -253,6 +266,25 @@ class ApiClient {
       throw new Error(data.message || "Failed to change password");
     }
   }
+
+  // ===== Simple getAllEmployees =====
+  async getAllEmployees(): Promise<Employee[]> {
+    const response = await fetch(`${this.baseURL}/employees`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeader(),
+      },
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch employees");
+    }
+
+    return data;
+  }
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);
@@ -263,4 +295,5 @@ export type {
   AttendanceSummaryResponse,
   UpdateProfileData,
   ChangePasswordData,
+  Employee,
 };
