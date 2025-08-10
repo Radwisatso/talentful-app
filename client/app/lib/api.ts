@@ -52,6 +52,11 @@ interface UpdateProfileData {
   photoUrl?: string;
 }
 
+interface ChangePasswordData {
+  currentPassword: string;
+  newPassword: string;
+}
+
 class ApiClient {
   private baseURL: string;
 
@@ -219,6 +224,35 @@ class ApiClient {
 
     return data;
   }
+
+  // Change password - sesuai dengan endpoint di employee.http
+  async changePassword(passwordData: ChangePasswordData): Promise<void> {
+    // Get user ID from localStorage
+    const userStr = localStorage.getItem("user");
+    const user = userStr ? JSON.parse(userStr) : null;
+
+    if (!user?.id) {
+      throw new Error("User not found in localStorage");
+    }
+
+    const response = await fetch(
+      `${this.baseURL}/employees/${user.id}/password`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...this.getAuthHeader(),
+        },
+        body: JSON.stringify(passwordData),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to change password");
+    }
+  }
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);
@@ -228,4 +262,5 @@ export type {
   AttendanceRecord,
   AttendanceSummaryResponse,
   UpdateProfileData,
+  ChangePasswordData,
 };
