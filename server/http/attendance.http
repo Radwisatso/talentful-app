@@ -13,8 +13,8 @@ Authorization: Bearer {{employeeToken}}
 Content-Type: application/json
 
 {
-  "date": "2025-01-09T08:00:00.000Z",
-  "time": "2025-01-09T08:00:00.000Z"
+  "date": "2025-01-10T08:00:00.000Z",
+  "time": "2025-01-10T08:00:00.000Z"
 }
 
 ### Admin Check In for Self (No employeeId = use own ID)
@@ -44,8 +44,8 @@ Authorization: Bearer {{employeeToken}}
 Content-Type: application/json
 
 {
-  "date": "2025-01-09T08:00:00.000Z",
-  "time": "2025-01-09T17:00:00.000Z"
+  "date": "2025-01-10T08:00:00.000Z",
+  "time": "2025-01-10T17:00:00.000Z"
 }
 
 ### Admin Check Out for Other Employee

@@ -17,9 +17,34 @@ interface LoginResponse {
   };
 }
 
-interface ApiError {
-  message: string;
-  statusCode: number;
+// Response structure sesuai dengan actual response Anda
+interface AttendanceRecord {
+  id: number;
+  employeeId: number;
+  date: string;
+  time: string;
+  status: "CHECKIN" | "CHECKOUT";
+  createdAt: string;
+  employee: {
+    id: number;
+    name: string;
+    email: string;
+    position: string;
+  };
+}
+
+interface AttendanceSummaryResponse {
+  attendances: AttendanceRecord[];
+  attendancesByDate: Record<string, AttendanceRecord[]>;
+  summary: {
+    totalCheckin: number;
+    totalCheckout: number;
+    totalAttendanceDays: number;
+    period: {
+      startDate: string;
+      endDate: string;
+    };
+  };
 }
 
 class ApiClient {
@@ -27,6 +52,11 @@ class ApiClient {
 
   constructor(baseURL: string) {
     this.baseURL = baseURL;
+  }
+
+  private getAuthHeader(): Record<string, string> {
+    const token = localStorage.getItem("accessToken");
+    return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
@@ -46,7 +76,33 @@ class ApiClient {
 
     return data;
   }
+
+  // Get attendance history via summary endpoint
+  async getAttendanceHistory(): Promise<AttendanceSummaryResponse> {
+    const response = await fetch(
+      `${this.baseURL}/attendances/summary?startDate=2025-01-01&endDate=2025-12-31`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...this.getAuthHeader(),
+        },
+      }
+    );
+
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to fetch attendance history");
+    }
+
+    return data;
+  }
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);
-export type { LoginCredentials, LoginResponse, ApiError };
+export type {
+  LoginCredentials,
+  LoginResponse,
+  AttendanceRecord,
+  AttendanceSummaryResponse,
+};
