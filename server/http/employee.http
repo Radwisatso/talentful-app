@@ -1,7 +1,7 @@
 ### Variables
 @baseUrl = http://localhost:3000
 @employeeToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMyLCJlbWFpbCI6ImpvaG4uZG9lQGNvbXBhbnkuY29tIiwibmFtZSI6IkpvaG4gRG9lIiwicm9sZSI6IkVNUExPWUVFIiwiaWF0IjoxNzU0NzI1MzQ0LCJleHAiOjE3NTQ3Mjg5NDR9.Ji13kIzx5g8Za8N1tg0STjmo8OY4itoUwsncVlS6Xvg
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjMxLCJlbWFpbCI6ImFkbWluQGNvbXBhbnkuY29tIiwibmFtZSI6IkFkbWluIEhSRCIsInJvbGUiOiJBRE1JTiIsImlhdCI6MTc1NDcyNTMzMSwiZXhwIjoxNzU0NzI4OTMxfQ.iaUHVHwDqqlqSBerUGQ9XilO9S9TLV94ryNsDiw-yBE
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjIsImVtYWlsIjoiYWRtaW5AY29tcGFueS5jb20iLCJuYW1lIjoiQWRtaW4gSFJEIiwicm9sZSI6IkFETUlOIiwiaWF0IjoxNzU0ODgyMDYzLCJleHAiOjE3NTQ5MjUyNjN9.mXbIuU_ZidwB0G-Bs6DkBwnhwf1eXSbzqH0Y0622qq4
 
 ### ========================================
 ### STEP 1: LOGIN TO GET TOKENS
