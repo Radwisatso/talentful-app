@@ -682,7 +682,6 @@ let EmployeeController = class EmployeeController {
         return this.employeeService.validateEmployee(dto.email, dto.password);
     }
     findAll(req) {
-        console.log(req);
         return this.employeeService.findAll();
     }
     create(dto) {

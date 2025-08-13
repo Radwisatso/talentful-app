@@ -1,14 +1,14 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "apps/server/src",
+  "sourceRoot": "apps/attendance-api-gateway/src",
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "tsConfigPath": "apps/server/tsconfig.app.json"
+    "tsConfigPath": "apps/attendance-api-gateway/tsconfig.app.json"
   },
   "monorepo": true,
-  "root": "apps/server",
+  "root": "apps/attendance-api-gateway",
   "projects": {
     "attendance": {
       "type": "application",
@@ -44,15 +44,6 @@
       "sourceRoot": "apps/employee/src",
       "compilerOptions": {
         "tsConfigPath": "apps/employee/tsconfig.app.json"
-      }
-    },
-    "server": {
-      "type": "application",
-      "root": "apps/server",
-      "entryFile": "main",
-      "sourceRoot": "apps/server/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/server/tsconfig.app.json"
       }
     }
   }

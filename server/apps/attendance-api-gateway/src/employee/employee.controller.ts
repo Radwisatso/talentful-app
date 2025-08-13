@@ -33,7 +33,6 @@ export class EmployeeController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   findAll(@Request() req) {
-    console.log(req);
     return this.employeeService.findAll();
   }
 

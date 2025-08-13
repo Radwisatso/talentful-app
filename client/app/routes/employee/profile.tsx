@@ -62,15 +62,6 @@ export default function EmployeeProfile({ loaderData }: Route.ComponentProps) {
       profile_picture,
       message,
     });
-
-    /*
-    // THIS CODE WILL BE PUT ON ADMIN SIDE TO MONITOR USER UPDATES (FIREBASE REALTIME DB)
-    const userUpdating = ref(firebaseRealtimeDb, "users/");
-    onValue(userUpdating, (snapshot) => {
-        const data = snapshot.val();
-        console.log("Current user data:", data);
-    });
-    */
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,7 +144,7 @@ export default function EmployeeProfile({ loaderData }: Route.ComponentProps) {
         user.id,
         user.email,
         updatedUser.photoUrl,
-        `${user.email} has updated his/her profile`
+        `${user.email}'s profile has been updated`
       );
     } catch (error: any) {
       console.error("Update profile error:", error);
