@@ -1,5 +1,33 @@
-node_modules
-# Keep environment variables out of version control
+# Node
+node_modules/
+dist/apps
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 .env
+.DS_Store
+*.tsbuildinfo
+*.log
 
-/generated/prisma
+# NestJS specific
+/coverage
+/tests/e2e/jest-e2e.json # If you have a separate config for e2e tests
+/tests/jest-*.json # Other Jest config files if they are generated or specific to your setup
+
+# Editor-specific
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Other
+temp/
+tmp/
+
+# Prisma
+generated/prisma
+
