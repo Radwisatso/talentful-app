@@ -6,11 +6,11 @@ export default function Footer({ variant = "default" }: FooterProps) {
   const getFooterText = () => {
     switch (variant) {
       case "EMPLOYEE":
-        return "© 2024 Dexa Attendance System - Employee Portal";
+        return "© 2024 Talentful Attendance System - Employee Portal";
       case "ADMIN":
-        return "© 2024 Dexa Attendance System - Admin Portal";
+        return "© 2024 Talentful Attendance System - Admin Portal";
       default:
-        return "© 2024 Dexa Attendance System";
+        return "© 2024 Talentful Attendance System";
     }
   };
 

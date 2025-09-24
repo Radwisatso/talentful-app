@@ -53,7 +53,7 @@ export default function Header({
               </svg>
             </div>
             <h1 className="ml-3 text-xl font-semibold text-gray-900">
-              Dexa Attendance
+              Talentful Attendance
             </h1>
             {badge && (
               <span

@@ -36,7 +36,7 @@ export async function clientLoader({ context }: Route.ClientLoaderArgs) {
 }
 
 export function meta() {
-  return [{ title: "Admin Dashboard - Dexa Attendance" }];
+  return [{ title: "Admin Dashboard - Talentful Attendance" }];
 }
 
 export default function AdminLayout({ loaderData }: Route.ComponentProps) {

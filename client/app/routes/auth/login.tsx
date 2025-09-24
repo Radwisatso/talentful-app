@@ -4,7 +4,7 @@ import { Form, redirect, useNavigation } from "react-router";
 import { apiClient } from "~/lib/api";
 
 export function meta() {
-  return [{ title: "Login - Dexa Attendance System" }];
+  return [{ title: "Login - Talentful Attendance System" }];
 }
 
 export async function clientAction({ request }: Route.ClientActionArgs) {

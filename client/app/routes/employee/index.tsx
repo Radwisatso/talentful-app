@@ -5,7 +5,7 @@ import { userContext } from "~/context";
 import { apiClient, type AttendanceSummaryResponse } from "~/lib/api";
 
 export function meta() {
-  return [{ title: "Employee Dashboard - Dexa Attendance" }];
+  return [{ title: "Employee Dashboard - Talentful Attendance" }];
 }
 
 export async function clientLoader({ context }: Route.ClientLoaderArgs) {

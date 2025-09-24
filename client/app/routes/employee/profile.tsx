@@ -10,7 +10,7 @@ import { apiClient, type ChangePasswordData } from "~/lib/api";
 import toast, { Toaster } from "react-hot-toast";
 
 export function meta() {
-  return [{ title: "Profile - Dexa Attendance" }];
+  return [{ title: "Profile - Talentful Attendance" }];
 }
 
 export async function clientLoader({ context }: Route.ClientLoaderArgs) {

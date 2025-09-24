@@ -21,7 +21,7 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-# Dexa Attendance Management System
+# Talentful Attendance Management System
 A microservices-based attendance management system built with NestJS, featuring JWT authentication, role-based authorization, and PostgreSQL database integration.
 
 ## ☁️ Deployment
@@ -100,7 +100,7 @@ server/
 
    ```bash
    git clone <repository-url>
-   cd dexa/server
+   cd ./server
    ```
 
 2. **Install dependencies**
@@ -119,7 +119,7 @@ server/
 
    ```env
    # Database
-   DATABASE_URL="postgresql://username:password@localhost:5432/dexa_attendance"
+   DATABASE_URL="postgresql://username:password@localhost:5432/talentful_attendance"
 
    # JWT Authentication
    JWT_SECRET="your-super-secret-jwt-key-here"

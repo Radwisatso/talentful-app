@@ -3,7 +3,7 @@ import { apiClient } from "~/lib/api";
 import type { Route } from "./+types/history";
 
 export function meta() {
-  return [{ title: "Attendance History - Dexa Attendance" }];
+  return [{ title: "Attendance History - Talentful Attendance" }];
 }
 
 export async function clientLoader() {

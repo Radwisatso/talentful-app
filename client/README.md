@@ -1,4 +1,4 @@
-# Dexa Attendance - Client
+# Talentful Attendance - Client
 
 Modern attendance management system with React Router v7, TypeScript, and Tailwind CSS.
 
@@ -131,8 +131,8 @@ const handleImageUpload = async (file: File) => {
 ## 🐳 Docker
 
 ```bash
-docker build -t dexa-client .
-docker run -p 5173:5173 dexa-client
+docker build -t talentful-client .
+docker run -p 5173:5173 talentful-client
 ```
 
 ## 📦 Scripts

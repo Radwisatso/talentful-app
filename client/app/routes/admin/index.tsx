@@ -10,7 +10,7 @@ import { useRevalidator } from "react-router";
 import toast, { Toaster } from "react-hot-toast";
 
 export function meta() {
-  return [{ title: "Admin Dashboard - Dexa Attendance" }];
+  return [{ title: "Admin Dashboard - Talentful Attendance" }];
 }
 
 export async function clientLoader({ context }: Route.ClientLoaderArgs) {

@@ -4,7 +4,7 @@ import Card from "../components/ui/Card";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "Dexa Attendance System" },
+    { title: "Talentful Attendance System" },
     { name: "description", content: "Employee Attendance Management System" },
   ];
 }
