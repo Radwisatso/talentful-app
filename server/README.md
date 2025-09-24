@@ -22,8 +22,12 @@
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
 # Dexa Attendance Management System
-
 A microservices-based attendance management system built with NestJS, featuring JWT authentication, role-based authorization, and PostgreSQL database integration.
+
+## ☁️ Deployment
+- Service API: [Link](https://talentful-app.onrender.com/)
+- Client Domain: coming soon
+
 
 ## 🏗️ Architecture
 
